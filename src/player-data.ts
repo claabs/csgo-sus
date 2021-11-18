@@ -3,16 +3,16 @@ import dotenv from 'dotenv';
 import SteamID from 'steamid';
 import { CSGOStatsGGScraper, MatchType, Player, PlayerOutput } from 'csgostatsgg-scraper';
 import pino from 'pino';
-import { writeFileSync } from 'fs-extra';
 import { CachedSteamApi } from './steamapi-cache';
 import { CachedCSGOStatsGGScraper } from './scraper-cache';
+import { InventoryValueCache, ItemWithValue } from './inventory-cache';
 
 dotenv.config();
 
 const L = pino();
 
 const steam = new CachedSteamApi(process.env.STEAM_API_KEY || '');
-const APP_ID = '730';
+const inventory = new InventoryValueCache();
 
 export const logError = (err: any): undefined => {
   L.error(err);
@@ -78,6 +78,7 @@ export interface PlayerData {
   playerBans?: PlayerBans;
   csgoStatsPlayer?: PlayerOutput;
   csgoStatsDeepPlayedWith?: DeepPlayedWith;
+  inventory?: ItemWithValue[];
 }
 
 export const getSignificantPlayedWith = async (steamId: string, scraper: CSGOStatsGGScraper) => {
@@ -106,6 +107,7 @@ export const getPlayersData = async (status: string): Promise<PlayerData[]> => {
     steam.getUserBansOrdered(steamIds.map((id) => id.getSteamID64())),
   ]);
   const scraper = new CachedCSGOStatsGGScraper();
+
   const playerDataPromises: Promise<PlayerData>[] = steamIds.map(async (steamId, index) => {
     const summary = playerSummaries[index];
     const playerBan = playerBans[index];
@@ -132,6 +134,7 @@ export const getPlayersData = async (status: string): Promise<PlayerData[]> => {
       // playerStats: isPublic
       //   ? await steam.getUserStats(steamId.getSteamID64(), APP_ID).catch(logError)
       //   : undefined,
+      inventory: await inventory.getInventoryValue(steamId.getSteamID64()).catch(logError),
       playerBans: playerBan,
       csgoStatsPlayer: await scraper.getPlayer(steamId.getSteamID64()).catch(logError),
       csgoStatsDeepPlayedWith: await getDeepPlayedWith(steamId.getSteamID64(), scraper).catch(

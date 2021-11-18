@@ -22,6 +22,7 @@
   "author": "claabs",
   "license": "AGPL-3.0-only",
   "dependencies": {
+    "axios": "^0.24.0",
     "csgostatsgg-scraper": "^1.0.2",
     "discord.js": "^13.3.1",
     "dotenv": "^10.0.0",
@@ -30,6 +31,7 @@
     "pino": "^7.1.0",
     "source-map-support": "^0.5.19",
     "steamapi": "^2.2.0",
+    "steamcommunity-inventory": "^2.0.5",
     "steamid": "^2.0.0"
   },
   "devDependencies": {
