@@ -1,4 +1,3 @@
-/* eslint-disable camelcase */
 import { EconItem, Inventory } from 'steamcommunity-inventory';
 import Cache from 'hybrid-disk-cache';
 import axios from 'axios';

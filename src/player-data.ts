@@ -8,6 +8,7 @@ import { CachedCSGOStatsGGScraper } from './scraper-cache';
 import { InventoryValueCache, InventoryWithValue } from './inventory-cache';
 import { ReputationSummary, SteamRepCache } from './steamrep-cache';
 import { SquadBanResponse, SquadCommunityBansCache } from './squad-community-bans-cache';
+import { FaceitCache, FaceitData } from './faceit-cache';
 
 dotenv.config();
 
@@ -17,7 +18,9 @@ const steam = new CachedSteamApi(process.env.STEAM_API_KEY || '');
 const inventory = new InventoryValueCache();
 const steamrep = new SteamRepCache();
 const squadCommunityBans = new SquadCommunityBansCache();
+const faceIt = new FaceitCache();
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const logError = (err: any): undefined => {
   L.error(err);
   return undefined;
@@ -85,6 +88,7 @@ export interface PlayerData {
   inventory?: InventoryWithValue;
   steamReputation?: ReputationSummary;
   squadCommunityBans?: SquadBanResponse;
+  faceit?: FaceitData;
 }
 
 export const getSignificantPlayedWith = async (steamId: string, scraper: CSGOStatsGGScraper) => {
@@ -150,9 +154,10 @@ export const getPlayersData = async (status: string): Promise<PlayerData[]> => {
       squadCommunityBans: await squadCommunityBans
         .getReputation(steamId.getSteamID64())
         .catch(logError),
+      faceit: await faceIt.getFaceitData(steamId.getSteamID64()).catch(logError),
     };
   });
   const playerData = await Promise.all(playerDataPromises);
-  // await scraper.close();
+  await scraper.close();
   return playerData;
 };
