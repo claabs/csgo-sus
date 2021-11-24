@@ -5,7 +5,9 @@ import { CSGOStatsGGScraper, MatchType, Player, PlayerOutput } from 'csgostatsgg
 import pino from 'pino';
 import { CachedSteamApi } from './steamapi-cache';
 import { CachedCSGOStatsGGScraper } from './scraper-cache';
-import { InventoryValueCache, ItemWithValue } from './inventory-cache';
+import { InventoryValueCache, InventoryWithValue } from './inventory-cache';
+import { ReputationSummary, SteamRepCache } from './steamrep-cache';
+import { SquadBanResponse, SquadCommunityBansCache } from './squad-community-bans-cache';
 
 dotenv.config();
 
@@ -13,6 +15,8 @@ const L = pino();
 
 const steam = new CachedSteamApi(process.env.STEAM_API_KEY || '');
 const inventory = new InventoryValueCache();
+const steamrep = new SteamRepCache();
+const squadCommunityBans = new SquadCommunityBansCache();
 
 export const logError = (err: any): undefined => {
   L.error(err);
@@ -78,7 +82,9 @@ export interface PlayerData {
   playerBans?: PlayerBans;
   csgoStatsPlayer?: PlayerOutput;
   csgoStatsDeepPlayedWith?: DeepPlayedWith;
-  inventory?: ItemWithValue[];
+  inventory?: InventoryWithValue;
+  steamReputation?: ReputationSummary;
+  squadCommunityBans?: SquadBanResponse;
 }
 
 export const getSignificantPlayedWith = async (steamId: string, scraper: CSGOStatsGGScraper) => {
@@ -134,12 +140,16 @@ export const getPlayersData = async (status: string): Promise<PlayerData[]> => {
       // playerStats: isPublic
       //   ? await steam.getUserStats(steamId.getSteamID64(), APP_ID).catch(logError)
       //   : undefined,
-      inventory: await inventory.getInventoryValue(steamId.getSteamID64()).catch(logError),
+      inventory: await inventory.getInventoryWithValue(steamId.getSteamID64()).catch(logError),
       playerBans: playerBan,
       csgoStatsPlayer: await scraper.getPlayer(steamId.getSteamID64()).catch(logError),
       csgoStatsDeepPlayedWith: await getDeepPlayedWith(steamId.getSteamID64(), scraper).catch(
         logError
       ),
+      steamReputation: await steamrep.getReputation(steamId.getSteamID64()).catch(logError),
+      squadCommunityBans: await squadCommunityBans
+        .getReputation(steamId.getSteamID64())
+        .catch(logError),
     };
   });
   const playerData = await Promise.all(playerDataPromises);

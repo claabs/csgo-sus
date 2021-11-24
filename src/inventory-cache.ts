@@ -8,6 +8,11 @@ export interface ItemWithValue {
   price?: number;
 }
 
+export interface InventoryWithValue {
+  collectibles: string[];
+  marketableItems: ItemWithValue[];
+}
+
 export interface CSGOTraderPrice {
   steam: {
     last_24h: number;
@@ -61,7 +66,7 @@ export class InventoryValueCache {
     return this.priceCache![marketHashName]?.steam.last_24h;
   }
 
-  public async getInventoryValue(steamId64: string): Promise<ItemWithValue[] | undefined> {
+  public async getInventoryWithValue(steamId64: string): Promise<InventoryWithValue | undefined> {
     const cacheKey = `inventory-${steamId64}`;
     const data = await this.cache.get(cacheKey);
     if (data) {
@@ -74,14 +79,21 @@ export class InventoryValueCache {
         steamID: steamId64,
       });
       const marketableItems = items.filter((item) => item.marketable > 0);
-      const itemWithPrices = await Promise.all(
+      const collectibles = items
+        .filter((item) => item.tags.some((tag) => tag.internal_name === 'CSGO_Type_Collectible'))
+        .map((item) => item.market_hash_name);
+      const marketableItemsWithPrices: ItemWithValue[] = await Promise.all(
         marketableItems.map(async (item) => ({
           price: await this.getItemPrice(item.market_hash_name),
           marketName: item.market_hash_name,
         }))
       );
-      await this.cache.set(cacheKey, Buffer.from(JSON.stringify(itemWithPrices)));
-      return itemWithPrices;
+      const resp: InventoryWithValue = {
+        marketableItems: marketableItemsWithPrices,
+        collectibles,
+      };
+      await this.cache.set(cacheKey, Buffer.from(JSON.stringify(resp)));
+      return resp;
     } catch (err) {
       if (err.response.status === 403) {
         return undefined;
