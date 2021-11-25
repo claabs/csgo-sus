@@ -56,8 +56,8 @@ export const getPrivateCreationDate = async (accountId: number, offset = 1): Pro
   const neighborSummaries: PlayerSummary[] = await steam.getUserSummary(userList);
 
   // They're ordered from closest to furthest, so pick the first public profile
-  const nearestNeighbor = neighborSummaries.find((p) => p.visibilityState === 3); // 3 is public
-  if (nearestNeighbor) return nearestNeighbor.createdAt;
+  const nearestNeighbor = neighborSummaries.find((p) => p.visibilityState === 3 && p.created); // 3 is public
+  if (nearestNeighbor) return new Date((nearestNeighbor.created as number) * 1000);
   // Else try again recursively
   return getPrivateCreationDate(accountId, newOffset);
 };
@@ -126,7 +126,7 @@ export const getPlayersData = async (status: string): Promise<PlayerData[]> => {
     return {
       steamId,
       createdAt: summary?.created
-        ? summary.createdAt
+        ? new Date(summary.created * 1000)
         : await getPrivateCreationDate(steamId.accountid),
       summary,
       steamLevel: isPublic

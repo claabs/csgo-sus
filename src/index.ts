@@ -1,6 +1,7 @@
 import 'source-map-support/register';
 import fs from 'fs-extra';
 import { getPlayersData } from './gather/index';
+import { analyzePlayers } from './analyze';
 
 const status = `#  3 2 "Chuck Lubs" STEAM_1:1:19993736 07:55 31 0 active 786432
 #  6 5 "Snowball" STEAM_1:0:19019648 07:55 55 0 active 196608
@@ -14,6 +15,10 @@ const status = `#  3 2 "Chuck Lubs" STEAM_1:1:19993736 07:55 31 0 active 786432
 # 14 13 "noreilly" STEAM_1:1:547419869 07:52 61 0 active 196608`;
 
 getPlayersData(status)
-  .then((result) => fs.outputJSONSync('_output.json', result, { spaces: 2 }))
-  .then(() => console.log('complete'))
+  .then((result) => {
+    fs.outputJSONSync('_gatherOutput.json', result, { spaces: 2 });
+    const analyzedPlayers = analyzePlayers(result);
+    fs.outputJSONSync('_analyzeOutput.json', analyzedPlayers, { spaces: 2 });
+    console.log('complete');
+  })
   .catch((err) => console.error(err));
