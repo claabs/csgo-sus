@@ -67,8 +67,8 @@ export type FaceitPlayer = Pick<
 >;
 
 export interface FaceitData {
-  player?: FaceitPlayer;
-  bans?: BanPayload[];
+  player: FaceitPlayer;
+  bans: BanPayload[];
   csgoData?: Game;
 }
 
@@ -78,13 +78,17 @@ export class FaceitCache {
     ttl: 60 * 60 * 24 * 7, // 1 week
   });
 
-  public async getFaceitData(steamId64: string): Promise<FaceitData> {
+  public async getFaceitData(steamId64: string): Promise<FaceitData | undefined> {
     const cacheKey = `faceit-${steamId64}`;
     const data = await this.cache.get(cacheKey);
     if (data) {
-      return JSON.parse(data.toString());
+      const dataString = data.toString();
+      if (dataString) {
+        return JSON.parse(data.toString());
+      }
+      return undefined; // Return cached empty value
     }
-    let faceitData: FaceitData;
+    let faceitData: FaceitData | undefined;
     try {
       const detailsResp = await axios.get<FaceitPlayerDetails>(
         'https://open.faceit.com/data/v4/players',
@@ -118,9 +122,10 @@ export class FaceitCache {
       if (err.response.status !== 404) {
         throw err;
       }
-      faceitData = {};
+      faceitData = undefined;
     }
-    await this.cache.set(cacheKey, Buffer.from(JSON.stringify(faceitData)));
+    const cacheString = faceitData ? JSON.stringify(faceitData) : ''; // Cache undefined as empty string to prevent future API errors
+    await this.cache.set(cacheKey, Buffer.from(cacheString));
     return faceitData;
   }
 }

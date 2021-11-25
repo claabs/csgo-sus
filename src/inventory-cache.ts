@@ -69,8 +69,13 @@ export class InventoryValueCache {
     const cacheKey = `inventory-${steamId64}`;
     const data = await this.cache.get(cacheKey);
     if (data) {
-      return JSON.parse(data.toString());
+      const dataString = data.toString();
+      if (dataString) {
+        return JSON.parse(data.toString());
+      }
+      return undefined; // Return cached empty value
     }
+    let inventory: InventoryWithValue | undefined;
     try {
       const items: EconItem[] = await this.inventory.get({
         appID: '730', // CSGO
@@ -87,17 +92,18 @@ export class InventoryValueCache {
           marketName: item.market_hash_name,
         }))
       );
-      const resp: InventoryWithValue = {
+      inventory = {
         marketableItems: marketableItemsWithPrices,
         collectibles,
       };
-      await this.cache.set(cacheKey, Buffer.from(JSON.stringify(resp)));
-      return resp;
     } catch (err) {
-      if (err.response.status === 403) {
-        return undefined;
+      if (err.response.status !== 403) {
+        throw err;
       }
-      throw err;
+      inventory = undefined;
     }
+    const cacheString = inventory ? JSON.stringify(inventory) : ''; // Cache undefined as empty string to prevent future API errors
+    await this.cache.set(cacheKey, Buffer.from(cacheString));
+    return inventory;
   }
 }
