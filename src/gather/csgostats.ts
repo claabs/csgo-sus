@@ -7,7 +7,7 @@ import {
 } from 'csgostatsgg-scraper';
 import Cache from 'hybrid-disk-cache';
 
-export class CachedCSGOStatsGGScraper extends CSGOStatsGGScraper {
+export class CSGOStatsGGScraperCache extends CSGOStatsGGScraper {
   private cache = new Cache({
     path: '/tmp/csgo-sus-cache/csgostatsgg-scraper',
     ttl: 60 * 60 * 24 * 7, // 1 week

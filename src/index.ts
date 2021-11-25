@@ -1,6 +1,6 @@
 import 'source-map-support/register';
 import fs from 'fs-extra';
-import { getPlayersData } from './player-data';
+import { getPlayersData } from './gather/index';
 
 const status = `#  3 2 "Chuck Lubs" STEAM_1:1:19993736 07:55 31 0 active 786432
 #  6 5 "Snowball" STEAM_1:0:19019648 07:55 55 0 active 196608

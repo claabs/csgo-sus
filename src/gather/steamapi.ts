@@ -1,7 +1,7 @@
 import SteamAPI from 'steamapi';
 import Cache from 'hybrid-disk-cache';
 
-export class CachedSteamApi extends SteamAPI {
+export class SteamApiCache extends SteamAPI {
   private cache = new Cache({
     path: '/tmp/csgo-sus-cache/steamapi',
     ttl: 60 * 60 * 24, // 1 day

@@ -3,18 +3,18 @@ import dotenv from 'dotenv';
 import SteamID from 'steamid';
 import { CSGOStatsGGScraper, MatchType, Player, PlayerOutput } from 'csgostatsgg-scraper';
 import pino from 'pino';
-import { CachedSteamApi } from './steamapi-cache';
-import { CachedCSGOStatsGGScraper } from './scraper-cache';
-import { InventoryValueCache, InventoryWithValue } from './inventory-cache';
-import { ReputationSummary, SteamRepCache } from './steamrep-cache';
-import { SquadBanResponse, SquadCommunityBansCache } from './squad-community-bans-cache';
-import { FaceitCache, FaceitData } from './faceit-cache';
+import { SteamApiCache } from './steamapi';
+import { CSGOStatsGGScraperCache } from './csgostats';
+import { InventoryValueCache, InventoryWithValue } from './inventory';
+import { ReputationSummary, SteamRepCache } from './steamrep';
+import { SquadBanResponse, SquadCommunityBansCache } from './squad-community-bans';
+import { FaceitCache, FaceitData } from './faceit';
 
 dotenv.config();
 
 const L = pino();
 
-const steam = new CachedSteamApi(process.env.STEAM_API_KEY || '');
+const steam = new SteamApiCache(process.env.STEAM_API_KEY || '');
 const inventory = new InventoryValueCache();
 const steamrep = new SteamRepCache();
 const squadCommunityBans = new SquadCommunityBansCache();
@@ -116,7 +116,7 @@ export const getPlayersData = async (status: string): Promise<PlayerData[]> => {
     steam.getUserSummaryOrdered(steamIds.map((id) => id.getSteamID64())),
     steam.getUserBansOrdered(steamIds.map((id) => id.getSteamID64())),
   ]);
-  const scraper = new CachedCSGOStatsGGScraper();
+  const scraper = new CSGOStatsGGScraperCache();
 
   const playerDataPromises: Promise<PlayerData>[] = steamIds.map(async (steamId, index) => {
     const summary = playerSummaries[index];
