@@ -31,8 +31,9 @@ export interface AnalysisSummary {
   csgoCollectibles: CSGOCollectiblesAnalysis;
 }
 
-export interface PlayerAnalysis extends AnalysisSummary {
+export interface PlayerAnalysis {
   nickname?: string;
+  analyses: AnalysisSummary;
   totalScore: number;
 }
 
@@ -49,7 +50,7 @@ export const analyzePlayers = (players: PlayerData[]): PlayerAnalysis[] => {
     const totalScore = analysesValues.reduce((acc, curr) => acc + curr.score, 0);
     return {
       nickname: player.summary?.nickname,
-      ...analyses,
+      analyses,
       totalScore,
     };
   });
