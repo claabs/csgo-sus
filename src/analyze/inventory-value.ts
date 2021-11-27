@@ -16,14 +16,14 @@ export const analyzeInventoryValue = (player: PlayerData): InventoryValueAnalysi
   let fixedInventoryValue: string | undefined;
   let marketableItemsCount: number | undefined;
   let score: number;
-  if (items && items.length) {
-    let valueDollars = items.reduce((accum, item) => {
+  if (items?.length) {
+    const valueDollars = items.reduce((accum, item) => {
       const itemPrice = item.price || 0;
       return accum + itemPrice;
     }, 0);
     marketableItemsCount = items.length;
-    valueDollars = valueDollars >= MAXIMUM_VALUE ? MAXIMUM_VALUE : valueDollars; // Cap at maximum value
-    score = valueDollars * VALUE_SCORE_MULTIPLIER + OFFSET;
+    const cappedValueDollars = valueDollars >= MAXIMUM_VALUE ? MAXIMUM_VALUE : valueDollars; // Cap at maximum value
+    score = cappedValueDollars * VALUE_SCORE_MULTIPLIER + OFFSET;
     fixedInventoryValue = `$${valueDollars.toFixed(2)}`;
   } else {
     score = PRIVATE_PROFILE_SCORE;

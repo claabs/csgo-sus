@@ -8,7 +8,7 @@ export interface AccountAgeAnalysis extends Analysis {
 }
 
 const SCORE_RANGE = 100;
-const OFFSET = -10;
+const OFFSET = -10; // Recent 10% of time gets negative
 const STEAM_CREATE_DATE = moment('2003-09-12');
 
 export const analyzeAccountAge = (player: PlayerData): AccountAgeAnalysis => {

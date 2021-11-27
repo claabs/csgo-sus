@@ -80,6 +80,7 @@ export interface PlayerData {
   steamLevel?: number;
   ownedGames?: SteamApi.Game[];
   recentGames?: RecentGame[];
+  badges?: SteamApi.PlayerBadges;
   friends?: Friend[];
   // playerStats?: PlayerStats;
   playerBans?: PlayerBans;
@@ -137,6 +138,9 @@ export const getPlayersData = async (status: string): Promise<PlayerData[]> => {
         : undefined,
       recentGames: isPublic
         ? await steam.getUserRecentGames(steamId.getSteamID64()).catch(logError)
+        : undefined,
+      badges: isPublic
+        ? await steam.getUserBadges(steamId.getSteamID64()).catch(logError)
         : undefined,
       friends: isPublic
         ? await steam.getUserFriends(steamId.getSteamID64()).catch(logError)

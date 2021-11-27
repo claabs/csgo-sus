@@ -1,8 +1,10 @@
+import { PlayerData } from '../gather';
+import { Analysis } from './common';
 import { analyzeAccountAge, AccountAgeAnalysis } from './account-age';
 import { analyzeSteamLevel, SteamLevelAnalysis } from './steam-level';
 import { analyzeInventoryValue, InventoryValueAnalysis } from './inventory-value';
-import { PlayerData } from '../gather';
-import { Analysis } from './common';
+import { analyzeOwnedGames, OwnedGamesAnalysis } from './owned-games';
+import { analyzeCSGOBadges, CSGOBadgesAnalysis } from './csgo-badges';
 
 /**
  * Account age
@@ -23,7 +25,11 @@ import { Analysis } from './common';
  */
 
 export type AnalysisDetails = Omit<
-  AccountAgeAnalysis & SteamLevelAnalysis & InventoryValueAnalysis,
+  AccountAgeAnalysis &
+    SteamLevelAnalysis &
+    InventoryValueAnalysis &
+    OwnedGamesAnalysis &
+    CSGOBadgesAnalysis,
   keyof Analysis
 >;
 export type PlayerAnalysis = AnalysisDetails & { nickname?: string; totalScore: number };
@@ -34,6 +40,8 @@ export const analyzePlayers = (players: PlayerData[]): PlayerAnalysis[] => {
       analyzeAccountAge(player),
       analyzeSteamLevel(player),
       analyzeInventoryValue(player),
+      analyzeOwnedGames(player),
+      analyzeCSGOBadges(player),
     ];
     const totalScore = analyses.reduce((acc, curr) => acc + curr.score, 0);
     const analysisDetails = analyses.reduce((acc, curr) => {

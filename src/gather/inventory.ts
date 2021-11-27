@@ -8,7 +8,7 @@ export interface ItemWithValue {
 }
 
 export interface InventoryWithValue {
-  collectibles: string[];
+  collectibles: EconItem[];
   marketableItems: ItemWithValue[];
 }
 
@@ -83,9 +83,9 @@ export class InventoryValueCache {
         steamID: steamId64,
       });
       const marketableItems = items.filter((item) => item.marketable > 0);
-      const collectibles = items
-        .filter((item) => item.tags.some((tag) => tag.internal_name === 'CSGO_Type_Collectible'))
-        .map((item) => item.market_hash_name);
+      const collectibles = items.filter((item) =>
+        item.tags.some((tag) => tag.internal_name === 'CSGO_Type_Collectible')
+      );
       const marketableItemsWithPrices: ItemWithValue[] = await Promise.all(
         marketableItems.map(async (item) => ({
           price: await this.getItemPrice(item.market_hash_name),

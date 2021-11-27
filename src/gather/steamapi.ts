@@ -31,6 +31,17 @@ export class SteamApiCache extends SteamAPI {
     return resp;
   }
 
+  public async getUserBadges(id: string): Promise<SteamAPI.PlayerBadges> {
+    const cacheKey = `user-badges-${id}`;
+    const data = await this.cache.get(cacheKey);
+    if (data) {
+      return JSON.parse(data.toString());
+    }
+    const resp = await super.getUserBadges(id);
+    await this.cache.set(cacheKey, Buffer.from(JSON.stringify(resp)));
+    return resp;
+  }
+
   public async getUserRecentGames(id: string): Promise<SteamAPI.Game[]> {
     const cacheKey = `user-recent-games-${id}`;
     const data = await this.cache.get(cacheKey);
@@ -108,7 +119,6 @@ export class SteamApiCache extends SteamAPI {
       return cachedResults;
     }
     const resp = await super.getUserBans(uncachedIds);
-
     await Promise.all(
       resp.map(async (bans) => {
         const cacheKey = `${cachePrefix}${bans.steamID}`;
