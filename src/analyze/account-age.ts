@@ -1,10 +1,10 @@
 import moment from 'moment';
 import { PlayerData } from '../gather';
+import { Analysis } from './common';
 
-export interface AccountAgeAnalysis {
+export interface AccountAgeAnalysis extends Analysis {
   accountCreatedAgo: string;
   accountCreatedDate: string;
-  score: number;
 }
 
 const SCORE_RANGE = 100;

@@ -1,8 +1,8 @@
 import { PlayerData } from '../gather';
+import { Analysis } from './common';
 
-export interface SteamLevelAnalysis {
+export interface SteamLevelAnalysis extends Analysis {
   steamLevel?: number;
-  score: number;
 }
 
 const LEVEL_SCORE_MULTIPLIER = 0.5;

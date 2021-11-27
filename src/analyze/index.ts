@@ -2,12 +2,13 @@ import { analyzeAccountAge, AccountAgeAnalysis } from './account-age';
 import { analyzeSteamLevel, SteamLevelAnalysis } from './steam-level';
 import { analyzeInventoryValue, InventoryValueAnalysis } from './inventory-value';
 import { PlayerData } from '../gather';
+import { Analysis } from './common';
 
 /**
  * Account age
  * Steam level
- * Number of owned games
  * Inventory value
+ * Number of owned games
  * CSGO badges
  * Player bans
  * Friend bans
@@ -21,24 +22,33 @@ import { PlayerData } from '../gather';
  * Faceit
  */
 
-export type PlayerAnalysis = AccountAgeAnalysis &
-  SteamLevelAnalysis &
-  InventoryValueAnalysis & { nickname?: string; fixedScore: string };
+export type AnalysisDetails = Omit<
+  AccountAgeAnalysis & SteamLevelAnalysis & InventoryValueAnalysis,
+  keyof Analysis
+>;
+export type PlayerAnalysis = AnalysisDetails & { nickname?: string; totalScore: number };
 
 export const analyzePlayers = (players: PlayerData[]): PlayerAnalysis[] => {
   const analyzedPlayers: PlayerAnalysis[] = players.map((player) => {
-    const age = analyzeAccountAge(player);
-    const level = analyzeSteamLevel(player);
-    const inventory = analyzeInventoryValue(player);
-    const score = age.score + level.score + inventory.score;
-    const fixedScore = score.toFixed(1);
+    const analyses = [
+      analyzeAccountAge(player),
+      analyzeSteamLevel(player),
+      analyzeInventoryValue(player),
+    ];
+    const totalScore = analyses.reduce((acc, curr) => acc + curr.score, 0);
+    const analysisDetails = analyses.reduce((acc, curr) => {
+      const prunedEntries = Object.entries(curr).filter(([key]) => key !== 'score');
+      const prunedDetails = Object.fromEntries(prunedEntries) as AnalysisDetails;
+      return {
+        ...acc,
+        ...prunedDetails,
+      };
+    }, {}) as AnalysisDetails;
+
     return {
       nickname: player.summary?.nickname,
-      ...age,
-      ...level,
-      ...inventory,
-      score,
-      fixedScore,
+      ...analysisDetails,
+      totalScore,
     };
   });
   return analyzedPlayers;
