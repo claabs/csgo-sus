@@ -1,14 +1,15 @@
 import SteamApi, { Friend, PlayerBans, PlayerSummary, RecentGame } from 'steamapi';
-import dotenv from 'dotenv';
 import SteamID from 'steamid';
 import { CSGOStatsGGScraper, MatchType, Player, PlayerOutput } from 'csgostatsgg-scraper';
 import pino from 'pino';
+import dotenv from 'dotenv';
 import { SteamApiCache } from './steamapi';
 import { CSGOStatsGGScraperCache } from './csgostats';
 import { InventoryValueCache, InventoryWithValue } from './inventory';
 import { ReputationSummary, SteamRepCache } from './steamrep';
 import { SquadBanResponse, SquadCommunityBansCache } from './squad-community-bans';
 import { FaceitCache, FaceitData } from './faceit';
+import { parseStatus } from '../common/util';
 
 dotenv.config();
 
@@ -60,12 +61,6 @@ export const getPrivateCreationDate = async (accountId: number, offset = 1): Pro
   if (nearestNeighbor) return new Date((nearestNeighbor.created as number) * 1000);
   // Else try again recursively
   return getPrivateCreationDate(accountId, newOffset);
-};
-
-export const parseStatus = (status: string): SteamID[] => {
-  const steam2Ids = status.match(/(STEAM_[0-5]:[0-1]:[0-9]+)/g);
-  if (!steam2Ids) return [];
-  return steam2Ids.map((id) => new SteamID(id));
 };
 
 export interface DeepPlayedWith {
