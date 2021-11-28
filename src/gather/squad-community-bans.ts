@@ -1,5 +1,6 @@
 import Cache from 'hybrid-disk-cache';
 import axios from 'axios';
+import { getCacheDir } from '../common/util';
 
 export interface BanList {
   id: number;
@@ -54,7 +55,7 @@ export interface SquadBanResponse {
 
 export class SquadCommunityBansCache {
   private cache = new Cache({
-    path: '/tmp/csgo-sus-cache/squad-community',
+    path: `${getCacheDir()}/csgo-sus-cache/squad-community`,
     ttl: 60 * 60 * 24 * 7, // 1 week
   });
 

@@ -1,19 +1,16 @@
 import SteamApi, { Friend, PlayerBans, PlayerSummary, RecentGame } from 'steamapi';
 import SteamID from 'steamid';
 import { CSGOStatsGGScraper, MatchType, Player, PlayerOutput } from 'csgostatsgg-scraper';
-import pino from 'pino';
 import dotenv from 'dotenv';
+import L from '../common/logger';
 import { SteamApiCache } from './steamapi';
 import { CSGOStatsGGScraperCache } from './csgostats';
 import { InventoryValueCache, InventoryWithValue } from './inventory';
 import { ReputationSummary, SteamRepCache } from './steamrep';
 import { SquadBanResponse, SquadCommunityBansCache } from './squad-community-bans';
 import { FaceitCache, FaceitData } from './faceit';
-import { parseStatus } from '../common/util';
 
 dotenv.config();
-
-const L = pino();
 
 const steam = new SteamApiCache(process.env.STEAM_API_KEY || '');
 const inventory = new InventoryValueCache();
@@ -77,7 +74,6 @@ export interface PlayerData {
   recentGames?: RecentGame[];
   badges?: SteamApi.PlayerBadges;
   friends?: Friend[];
-  // playerStats?: PlayerStats;
   playerBans?: PlayerBans;
   csgoStatsPlayer?: PlayerOutput;
   csgoStatsDeepPlayedWith?: DeepPlayedWith;
@@ -105,8 +101,7 @@ export const getDeepPlayedWith = async (
   return { root: rootPlayedWith, deep: deepPlayedWith };
 };
 
-export const getPlayersData = async (status: string): Promise<PlayerData[]> => {
-  const steamIds = parseStatus(status);
+export const getPlayersData = async (steamIds: SteamID[]): Promise<PlayerData[]> => {
   // These APIs support multiple players at once
   const [playerSummaries, playerBans] = await Promise.all([
     steam.getUserSummaryOrdered(steamIds.map((id) => id.getSteamID64())),
@@ -139,10 +134,7 @@ export const getPlayersData = async (status: string): Promise<PlayerData[]> => {
         : undefined,
       friends: isPublic
         ? await steam.getUserFriends(steamId.getSteamID64()).catch(logError)
-        : undefined, // TODO: Get friends' Steam details
-      // playerStats: isPublic
-      //   ? await steam.getUserStats(steamId.getSteamID64(), APP_ID).catch(logError)
-      //   : undefined,
+        : undefined, // TODO: Get friends' Steam details?
       inventory: await inventory.getInventoryWithValue(steamId.getSteamID64()).catch(logError),
       playerBans: playerBan,
       csgoStatsPlayer: await scraper.getPlayer(steamId.getSteamID64()).catch(logError),
@@ -157,6 +149,7 @@ export const getPlayersData = async (status: string): Promise<PlayerData[]> => {
     };
   });
   const playerData = await Promise.all(playerDataPromises);
-  await scraper.close();
+  // await (await scraper.handler.createAgent()).close(); // Temp fix for: https://github.com/ulixee/secret-agent/issues/394
+  // await scraper.close();
   return playerData;
 };

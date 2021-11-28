@@ -6,10 +6,11 @@ import {
   PlayerOutput,
 } from 'csgostatsgg-scraper';
 import Cache from 'hybrid-disk-cache';
+import { getCacheDir } from '../common/util';
 
 export class CSGOStatsGGScraperCache extends CSGOStatsGGScraper {
   private cache = new Cache({
-    path: '/tmp/csgo-sus-cache/csgostatsgg-scraper',
+    path: `${getCacheDir()}/csgo-sus-cache/csgostatsgg-scraper`,
     ttl: 60 * 60 * 24 * 7, // 1 week
   });
 

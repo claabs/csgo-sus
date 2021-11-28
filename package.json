@@ -34,6 +34,7 @@
     "hybrid-disk-cache": "^0.2.0",
     "moment": "^2.29.1",
     "pino": "^7.1.0",
+    "pino-pretty": "^7.2.0",
     "source-map-support": "^0.5.19",
     "steamapi": "^2.2.0",
     "steamcommunity-inventory": "^2.0.5",

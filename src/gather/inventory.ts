@@ -1,6 +1,7 @@
 import { EconItem, Inventory } from 'steamcommunity-inventory';
 import Cache from 'hybrid-disk-cache';
 import axios from 'axios';
+import { getCacheDir } from '../common/util';
 
 export interface ItemWithValue {
   marketName: string;
@@ -26,7 +27,7 @@ export interface PriceCache {
 
 export class InventoryValueCache {
   private cache = new Cache({
-    path: '/tmp/csgo-sus-cache/inventory-value',
+    path: `${getCacheDir()}/csgo-sus-cache/inventory-value`,
     ttl: 60 * 60 * 24 * 7, // 1 week
   });
 
@@ -45,7 +46,7 @@ export class InventoryValueCache {
   private async getItemPrice(marketHashName: string): Promise<number | undefined> {
     const cacheKey = `market-price`;
     const cache = new Cache({
-      path: '/tmp/csgo-sus-cache/csgo-prices',
+      path: `${getCacheDir()}/csgo-sus-cache/csgo-prices`,
       ttl: 60 * 60 * 24, // 1 day
     });
     if (!this.priceCache) {

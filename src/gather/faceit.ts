@@ -1,5 +1,6 @@
 import Cache from 'hybrid-disk-cache';
 import axios from 'axios';
+import { getCacheDir } from '../common/util';
 
 export interface Game {
   region: string;
@@ -74,7 +75,7 @@ export interface FaceitData {
 
 export class FaceitCache {
   private cache = new Cache({
-    path: '/tmp/csgo-sus-cache/faceit',
+    path: `${getCacheDir()}/csgo-sus-cache/faceit`,
     ttl: 60 * 60 * 24 * 7, // 1 week
   });
 

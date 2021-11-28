@@ -1,5 +1,6 @@
 import Cache from 'hybrid-disk-cache';
 import axios from 'axios';
+import { getCacheDir } from '../common/util';
 
 export interface Reputation {
   full: string;
@@ -29,7 +30,7 @@ export type ReputationSummary = 'none' | string;
 
 export class SteamRepCache {
   private cache = new Cache({
-    path: '/tmp/csgo-sus-cache/steamrep',
+    path: `${getCacheDir()}/csgo-sus-cache/steamrep`,
     ttl: 60 * 60 * 24 * 7 * 4, // 4 weeks
   });
 
