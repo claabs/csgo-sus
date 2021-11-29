@@ -2,6 +2,7 @@ import SteamApi, { Friend, PlayerBans, PlayerSummary, RecentGame } from 'steamap
 import SteamID from 'steamid';
 import { CSGOStatsGGScraper, MatchType, Player, PlayerOutput } from 'csgostatsgg-scraper';
 import dotenv from 'dotenv';
+import { EventEmitter } from 'events';
 import L from '../common/logger';
 import { SteamApiCache } from './steamapi';
 import { CSGOStatsGGScraperCache } from './csgostats';
@@ -11,6 +12,7 @@ import { SquadBanResponse, SquadCommunityBansCache } from './squad-community-ban
 import { FaceitCache, FaceitData } from './faceit';
 
 dotenv.config();
+EventEmitter.defaultMaxListeners = 100; // This doesn't seem to work..
 
 const steam = new SteamApiCache(process.env.STEAM_API_KEY || '');
 const inventory = new InventoryValueCache();

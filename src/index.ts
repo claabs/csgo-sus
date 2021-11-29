@@ -1,9 +1,9 @@
 import 'source-map-support/register';
-import fs from 'fs-extra';
+// import fs from 'fs-extra';
 import dotenv from 'dotenv';
 import './discord/bot';
-import { getPlayersData } from './gather/index';
-import { analyzePlayers } from './analyze';
+// import { getPlayersData } from './gather/index';
+// import { analyzePlayers } from './analyze';
 
 dotenv.config();
 

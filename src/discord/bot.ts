@@ -58,7 +58,7 @@ export function analysisToEmbed(analysis: PlayerAnalysis): MessageEmbed {
   const { totalScore } = analysis;
   let color: ColorResolvable;
   if (totalScore < 0) color = 'RED';
-  else if (totalScore < 10) color = 'LIGHT_GREY';
+  else if (totalScore < 10) color = 'ORANGE';
   else if (totalScore < 100) color = 'GREEN';
   else color = 'DARK_GREEN';
 
@@ -112,7 +112,7 @@ try {
     const steamIds = parseStatus(message.content);
     if (steamIds.length < 2) return;
     // Send a message containing the status message (if the bot has message permissions)
-    L.info('Detected multiple steamIds in a message, investigating...');
+    L.info(`Detected ${steamIds.length} steamIds in a message, investigating...`);
     await message.channel.sendTyping();
     const embeds = await investigateSteamIds(steamIds);
     await message.reply({ embeds });
@@ -127,6 +127,7 @@ try {
         await interaction.deferReply();
         const message = interaction.options.getMessage('message', true);
         const steamIds = parseStatus(message.content);
+        L.info(`Investigating ${steamIds.length} steamId from Message Command`);
         if (!steamIds.length) return;
         const embeds = await investigateSteamIds(steamIds);
         L.trace('editing reply');

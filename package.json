@@ -6,7 +6,9 @@
     "test": "jest --coverage",
     "build": "rimraf dist && tsc",
     "lint": "tsc --noEmit && eslint src/**/*.ts",
-    "start": "ts-node src/index.ts"
+    "start": "ts-node src/index.ts",
+    "docker:build": "docker build . -t ghcr.io/claabs/csgo-sus:latest --target deploy",
+    "docker:run": "mkdir -p volume && chmod 777 volume && docker run --rm -ti --security-opt seccomp=\"https://raw.githubusercontent.com/ulixee/secret-agent/main/tools/docker/seccomp_profile.json\" -v $(pwd)/volume:/csgo-sus --env-file .env ghcr.io/claabs/csgo-sus:latest"
   },
   "keywords": [
     "csgostats.gg",
@@ -24,7 +26,7 @@
   "license": "AGPL-3.0-only",
   "dependencies": {
     "@discordjs/builders": "^0.8.2",
-    "@discordjs/rest": "^0.1.0-canary.0",
+    "@discordjs/rest": "^0.1.1-canary.0",
     "axios": "^0.24.0",
     "csgostatsgg-scraper": "^1.1.1",
     "discord-api-types": "^0.24.0",
@@ -43,7 +45,7 @@
   "devDependencies": {
     "@types/fs-extra": "^9.0.13",
     "@types/jest": "^27.0.2",
-    "@types/node": "^16.11.6",
+    "@types/node": "^16.11.10",
     "@types/steamapi": "^2.2.1",
     "@types/steamid": "^2.0.1",
     "@typescript-eslint/eslint-plugin": "^5.2.0",
