@@ -164,3 +164,10 @@ export const getPlayersData = async (steamIds: SteamID[]): Promise<PlayerData[]>
   // await scraper.close();
   return playerData;
 };
+
+export const getPlayerData = async (resolvableId: string): Promise<PlayerData> => {
+  const steamId64 = await steam.resolve(resolvableId);
+  const steamId = SteamID.fromIndividualAccountID(steamId64);
+  const [playerData] = await getPlayersData([steamId]);
+  return playerData;
+};

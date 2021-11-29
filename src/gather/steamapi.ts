@@ -8,6 +8,17 @@ export class SteamApiCache extends SteamAPI {
     ttl: 60 * 60 * 24, // 1 day
   });
 
+  public async resolve(value: string): Promise<string> {
+    const cacheKey = `resolve-${value}`;
+    const data = await this.cache.get(cacheKey);
+    if (data) {
+      return data.toString();
+    }
+    const resp = await super.resolve(value);
+    await this.cache.set(cacheKey, Buffer.from(resp));
+    return resp;
+  }
+
   public async getUserLevel(id: string): Promise<number> {
     const cacheKey = `user-level-${id}`;
     const data = await this.cache.get(cacheKey);

@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 import SteamID from 'steamid';
 import { AnalysesEntry, analyzePlayers, PlayerAnalysis } from '../analyze';
 import { parseStatus } from '../common/util';
-import { getPlayersData } from '../gather';
+import { getPlayerData, getPlayersData } from '../gather';
 import { deployCommands } from './deploy-commands';
 import L from '../common/logger';
 
@@ -142,8 +142,19 @@ try {
        */
       if (commandName === 'user') {
         // Use the /user command
+        const steamId = interaction.options.getString('id', true);
+        L.info(`Responding to /user command for ${steamId}`);
         await interaction.deferReply();
-        await interaction.reply('To be implemented');
+        try {
+          const playerData = await getPlayerData(steamId);
+          L.debug('Gathered player data. Analyzing...');
+          const analyzedResults = analyzePlayers([playerData]);
+          L.trace('Mapping result to embed');
+          const embeds = analyzedResults.map(analysisToEmbed);
+          await interaction.editReply({ embeds });
+        } catch (err) {
+          L.error(err);
+        }
       }
     }
   });
