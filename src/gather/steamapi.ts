@@ -21,15 +21,28 @@ export class SteamApiCache extends SteamAPI {
     return resp;
   }
 
-  public async getUserOwnedGames(id: string): Promise<SteamAPI.Game[]> {
+  public async getUserOwnedGamesOptional(id: string): Promise<SteamAPI.Game[] | undefined> {
     const cacheKey = `user-owned-games-${id}`;
     const data = await this.cache.get(cacheKey);
     if (data) {
-      return JSON.parse(data.toString());
+      const dataString = data.toString();
+      if (dataString) {
+        return JSON.parse(data.toString());
+      }
+      return undefined; // Return cached empty value
     }
-    const resp = await super.getUserOwnedGames(id);
-    await this.cache.set(cacheKey, Buffer.from(JSON.stringify(resp)));
-    return resp;
+    let games: SteamAPI.Game[] | undefined;
+    try {
+      games = await super.getUserOwnedGames(id);
+    } catch (err) {
+      if (err.message === 'No games found') {
+        games = undefined;
+      }
+      throw err;
+    }
+    const cacheString = games ? JSON.stringify(games) : ''; // Cache undefined as empty string to prevent future API errors
+    await this.cache.set(cacheKey, Buffer.from(cacheString));
+    return games;
   }
 
   public async getUserBadges(id: string): Promise<SteamAPI.PlayerBadges> {

@@ -135,7 +135,7 @@ export const getPlayersData = async (steamIds: SteamID[]): Promise<PlayerData[]>
         ? await steam.getUserLevel(steamId.getSteamID64()).catch(logError)
         : undefined,
       ownedGames: isPublic
-        ? await steam.getUserOwnedGames(steamId.getSteamID64()).catch(logError)
+        ? await steam.getUserOwnedGamesOptional(steamId.getSteamID64()).catch(logError)
         : undefined,
       recentGames: isPublic
         ? await steam.getUserRecentGames(steamId.getSteamID64()).catch(logError)
