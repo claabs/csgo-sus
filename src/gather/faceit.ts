@@ -120,7 +120,7 @@ export class FaceitCache {
         csgoData,
       };
     } catch (err) {
-      if (err.response.status !== 404) {
+      if (err.response?.status !== 404) {
         throw err;
       }
       faceitData = undefined;
