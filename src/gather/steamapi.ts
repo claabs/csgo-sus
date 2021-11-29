@@ -46,10 +46,10 @@ export class SteamApiCache extends SteamAPI {
     try {
       games = await super.getUserOwnedGames(id);
     } catch (err) {
-      if (err.message === 'No games found') {
-        games = undefined;
+      if (err.message !== 'No games found') {
+        throw err;
       }
-      throw err;
+      games = undefined;
     }
     const cacheString = games ? JSON.stringify(games) : ''; // Cache undefined as empty string to prevent future API errors
     await this.cache.set(cacheKey, Buffer.from(cacheString));
