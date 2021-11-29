@@ -3,6 +3,7 @@ import SteamID from 'steamid';
 import { CSGOStatsGGScraper, MatchType, Player, PlayerOutput } from 'csgostatsgg-scraper';
 import dotenv from 'dotenv';
 import { EventEmitter } from 'events';
+import { AxiosError } from 'axios';
 import L from '../common/logger';
 import { SteamApiCache } from './steamapi';
 import { CSGOStatsGGScraperCache } from './csgostats';
@@ -10,6 +11,7 @@ import { InventoryValueCache, InventoryWithValue } from './inventory';
 import { ReputationSummary, SteamRepCache } from './steamrep';
 import { SquadBanResponse, SquadCommunityBansCache } from './squad-community-bans';
 import { FaceitCache, FaceitData } from './faceit';
+import { cleanAxiosResponse } from '../common/util';
 
 dotenv.config();
 EventEmitter.defaultMaxListeners = 100; // This doesn't seem to work..
@@ -20,11 +22,17 @@ const steamrep = new SteamRepCache();
 const squadCommunityBans = new SquadCommunityBansCache();
 const faceIt = new FaceitCache();
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const logError = (err: any): undefined => {
-  L.error(err);
-  return undefined;
-};
+export const logErrorValue =
+  <T>(returnValue: T, logValue?: unknown): ((err: unknown) => T) =>
+  (err): T => {
+    if (logValue) L.warn(logValue);
+    L.error(err);
+    if ((err as AxiosError)?.response) {
+      L.error({ axiosResponse: cleanAxiosResponse(err as AxiosError) });
+    }
+    return returnValue;
+  };
+export const logError = logErrorValue(undefined);
 
 /**
  * Since accountIds are sequential, we just check the neighbors for their creation date, which should be fairly close
@@ -105,9 +113,10 @@ export const getDeepPlayedWith = async (
 
 export const getPlayersData = async (steamIds: SteamID[]): Promise<PlayerData[]> => {
   // These APIs support multiple players at once
+  const steamIds64 = steamIds.map((id) => id.getSteamID64());
   const [playerSummaries, playerBans] = await Promise.all([
-    steam.getUserSummaryOrdered(steamIds.map((id) => id.getSteamID64())),
-    steam.getUserBansOrdered(steamIds.map((id) => id.getSteamID64())),
+    steam.getUserSummaryOrdered(steamIds64).catch(logErrorValue([], steamIds64)),
+    steam.getUserBansOrdered(steamIds64).catch(logErrorValue([], steamIds64)),
   ]);
   const scraper = new CSGOStatsGGScraperCache();
 

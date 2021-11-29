@@ -1,5 +1,6 @@
 import SteamID from 'steamid';
 import dotenv from 'dotenv';
+import { AxiosError } from 'axios';
 
 dotenv.config();
 
@@ -11,4 +12,13 @@ export const parseStatus = (status: string): SteamID[] => {
 
 export const getCacheDir = (): string => {
   return process.env.CACHE_DIR || '/tmp';
+};
+
+export const cleanAxiosResponse = (err: AxiosError) => {
+  const { response } = err;
+  return {
+    status: response?.status,
+    headers: response?.headers,
+    data: response?.data,
+  };
 };
