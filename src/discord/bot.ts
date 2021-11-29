@@ -123,12 +123,12 @@ try {
       const { commandName } = interaction;
       if (commandName === 'Investigate status output') {
         // Right click on a message containing a status message
-        L.trace('Deferring reply');
-        await interaction.deferReply();
         const message = interaction.options.getMessage('message', true);
         const steamIds = parseStatus(message.content);
         L.info(`Investigating ${steamIds.length} steamId from Message Command`);
         if (!steamIds.length) return;
+        L.trace('Deferring reply');
+        await interaction.deferReply();
         const embeds = await investigateSteamIds(steamIds);
         L.trace('editing reply');
         await interaction.editReply({ embeds });
