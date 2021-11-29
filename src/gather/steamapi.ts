@@ -110,16 +110,17 @@ export class SteamApiCache extends SteamAPI {
       return cachedResults;
     }
     const resp = await super.getUserSummary(uncachedIds);
-
+    // Cache the new results
     await Promise.all(
       resp.map(async (summary) => {
         const cacheKey = `${cachePrefix}${summary.steamID}`;
         await this.cache.set(cacheKey, Buffer.from(JSON.stringify(summary)));
       })
     );
+    // Recombine new and cached results
     const populatedResults = ids.map((id, index) => {
       const cachedResult = cachedResults[index];
-      if (cachedResults) return cachedResult as SteamAPI.PlayerSummary;
+      if (cachedResult) return cachedResult;
       return resp.find((summary) => summary.steamID === id);
     });
     return populatedResults;
@@ -144,15 +145,17 @@ export class SteamApiCache extends SteamAPI {
       return cachedResults;
     }
     const resp = await super.getUserBans(uncachedIds);
+    // Cache the new results
     await Promise.all(
       resp.map(async (bans) => {
         const cacheKey = `${cachePrefix}${bans.steamID}`;
         await this.cache.set(cacheKey, Buffer.from(JSON.stringify(bans)));
       })
     );
+    // Recombine new and cached results
     const populatedResults = ids.map((id, index) => {
       const cachedResult = cachedResults[index];
-      if (cachedResults) return cachedResult as SteamAPI.PlayerBans;
+      if (cachedResult) return cachedResult;
       return resp.find((bans) => bans.steamID === id);
     });
     return populatedResults;
