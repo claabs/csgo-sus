@@ -68,7 +68,10 @@ export function mapAnalysisDetailsToField(
 export function analysisToEmbed(analysis: PlayerAnalysis): MessageEmbed {
   const { totalScore } = analysis;
   let color: ColorResolvable;
-  if (totalScore < 0) color = 'RED';
+  // TODO: make this a floating gradient, not buckets
+  if (totalScore < -150) color = 'NOT_QUITE_BLACK';
+  else if (totalScore < -50) color = 'DARK_RED';
+  else if (totalScore < 0) color = 'RED';
   else if (totalScore < 10) color = 'ORANGE';
   else if (totalScore < 100) color = 'GREEN';
   else color = 'DARK_GREEN';
