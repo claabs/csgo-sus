@@ -5,6 +5,7 @@ import { analyzeSteamLevel, SteamLevelAnalysis } from './steam-level';
 import { analyzeInventoryValue, InventoryValueAnalysis } from './inventory-value';
 import { analyzeOwnedGames, OwnedGamesAnalysis } from './owned-games';
 import { analyzeCSGOCollectibles, CSGOCollectiblesAnalysis } from './csgo-collectibles';
+import { analyzeRank, RankAnalysis } from './rank';
 
 /**
  * Account age
@@ -12,13 +13,13 @@ import { analyzeCSGOCollectibles, CSGOCollectiblesAnalysis } from './csgo-collec
  * Inventory value
  * Number of owned games
  * CSGO badges
+ * Derank
+ * Hours in CS
+ * Number of competitive matches won
  * Player bans
  * Friend bans
  * Smurf finder
- * Derank
  * Recent performance consistency
- * Hours in CS
- * Number of competitive matches won
  * Steamrep
  * Squad community bans
  * Faceit
@@ -30,6 +31,7 @@ export interface AnalysisSummary {
   inventoryValue: InventoryValueAnalysis;
   ownedGames: OwnedGamesAnalysis;
   csgoCollectibles: CSGOCollectiblesAnalysis;
+  rank: RankAnalysis;
 }
 
 export type AnalysesEntry = [keyof AnalysisSummary, AnalysisSummary[keyof AnalysisSummary]];
@@ -53,6 +55,7 @@ export const analyzePlayers = (players: PlayerData[]): PlayerAnalysis[] => {
       inventoryValue: analyzeInventoryValue(player),
       ownedGames: analyzeOwnedGames(player),
       csgoCollectibles: analyzeCSGOCollectibles(player),
+      rank: analyzeRank(player),
     };
     const totalScore = Object.values(analyses).reduce((acc, curr) => acc + curr.score, 0);
     const positiveAnalyses = Object.entries(analyses)

@@ -9,14 +9,14 @@ Lookup in-depth public data on CSGO players' accounts to see if they're suspicio
 - [x] Inventory value
 - [x] Number of owned games
 - [x] CSGO badges
+- [x] Derank
+- [ ] Hours in CS
+- [ ] Steamrep
 - [ ] Player bans
 - [ ] Friend bans
 - [ ] Smurf finder
-- [ ] Derank
 - [ ] Recent performance consistency
-- [ ] Hours in CS
 - [ ] Number of competitive matches won
-- [ ] Steamrep
 - [ ] Squad community bans
 - [ ] Faceit
 
