@@ -11,10 +11,21 @@ dotenv.config();
 
 const token = process.env.DISCORD_BOT_TOKEN || 'missing';
 
-const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
+const client = new Client({
+  intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES],
+  presence: {
+    activities: [
+      {
+        type: 'COMPETING',
+        name: 'CSGO | "status"',
+        url: 'https://csgos.us',
+      },
+    ],
+  },
+});
 
 client.once('ready', () => {
-  L.info('Ready!');
+  L.info('Discord bot logged in');
 });
 
 // Login to Discord with your client's token
@@ -64,10 +75,11 @@ export function analysisToEmbed(analysis: PlayerAnalysis): MessageEmbed {
 
   L.trace({ color }, 'Chose color');
 
+  const roundedTotalScore = totalScore > 0 ? Math.ceil(totalScore) : Math.floor(totalScore);
   const fields: EmbedFieldData[] = [
     {
-      name: 'SussyScore',
-      value: totalScore.toFixed(0),
+      name: 'SussyScore™',
+      value: roundedTotalScore.toString(),
     },
   ];
   L.trace('Mapping positive fields');
