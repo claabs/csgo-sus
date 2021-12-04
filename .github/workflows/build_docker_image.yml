@@ -42,4 +42,6 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           platforms: linux/amd64
+          build-args: |
+            COMMIT_SHA=${{ github.sha }}
 
