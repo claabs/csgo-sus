@@ -8,8 +8,9 @@ import {
 } from 'discord.js';
 import dotenv from 'dotenv';
 import SteamID from 'steamid';
+import type { PackageJsonPerson } from 'types-package-json';
 import { AnalysesEntry, analyzePlayer, analyzePlayers, PlayerAnalysis } from '../analyze';
-import { getScoreColor, parseStatus } from '../common/util';
+import { getScoreColor, getVersion, packageJson, parseStatus } from '../common/util';
 import { getPlayerData, getPlayersData } from '../gather';
 import { deployCommands } from './deploy-commands';
 import L from '../common/logger';
@@ -25,7 +26,7 @@ const client = new Client({
       {
         type: 'COMPETING',
         name: 'CSGO | "status"',
-        url: 'https://csgos.us',
+        url: packageJson().homepage,
       },
     ],
   },
@@ -97,8 +98,8 @@ export function analysisToEmbed(analysis: PlayerAnalysis): MessageEmbed {
   const embed = new MessageEmbed({
     color,
     author: {
-      name: 'csgos.us',
-      url: 'https://csgos.us',
+      name: packageJson().name,
+      url: packageJson().homepage,
     },
     thumbnail: {
       url: analysis.profileImage,
@@ -193,8 +194,8 @@ try {
         L.info(`Responding to /help command`);
         const embed = new MessageEmbed({
           author: {
-            name: 'csgos.us',
-            url: 'https://csgos.us',
+            name: packageJson().name,
+            url: packageJson().homepage,
           },
           title: 'Help',
           fields: [
@@ -216,6 +217,11 @@ try {
               value: `Use the \`/user\` command and provide any SteamID version or profile link`,
             },
           ],
+          footer: {
+            text: `${packageJson().name} v${getVersion()} by ${
+              (packageJson().author as PackageJsonPerson).name
+            }`,
+          },
         });
         await interaction.reply({ embeds: [embed] });
       }

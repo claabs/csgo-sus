@@ -6,6 +6,7 @@ import {
   Routes,
 } from 'discord-api-types/v9';
 import dotenv from 'dotenv';
+import { packageJson } from '../common/util';
 
 dotenv.config();
 
@@ -15,7 +16,7 @@ const guild = process.env.DISCORD_DEV_GUILD_ID;
 
 const helpSlashCommand = new SlashCommandBuilder()
   .setName('help')
-  .setDescription('How to use csgos.us');
+  .setDescription(`How to use ${packageJson().name}`);
 
 const userSlashCommand = new SlashCommandBuilder()
   .setName('user')

@@ -1,5 +1,5 @@
 {
-  "name": "csgo-sus",
+  "name": "csgos.us",
   "version": "0.1.0",
   "description": "Lookup in-depth public data on CSGO players' accounts to see if they're suspicious",
   "scripts": {
@@ -21,8 +21,11 @@
     "type": "git",
     "url": "https://github.com/claabs/csgo-sus.git"
   },
-  "homepage": "https://github.com/claabs/csgo-sus",
-  "author": "claabs",
+  "homepage": "https://csgos.us",
+  "author": {
+    "name": "Charlie Laabs",
+    "url": "https://github.com/claabs"
+  },
   "license": "AGPL-3.0-only",
   "dependencies": {
     "@discordjs/builders": "^0.8.2",
@@ -61,6 +64,7 @@
     "prettier": "^2.4.1",
     "ts-jest": "^27.0.5",
     "ts-node": "^10.2.1",
+    "types-package-json": "^2.0.39",
     "typescript": "^4.4.4"
   },
   "engines": {

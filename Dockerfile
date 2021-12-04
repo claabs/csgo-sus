@@ -61,7 +61,11 @@ LABEL org.opencontainers.image.title="csgo-sus" \
     org.opencontainers.image.name="csgo-sus" \
     org.opencontainers.image.base.name="node:16-bullseye-slim"
 
-ENV NODE_ENV=production CACHE_DIR=/csgo-sus
+ARG COMMIT_SHA=""
+
+ENV NODE_ENV=production \
+    CACHE_DIR=/csgo-sus \
+    COMMIT_SHA=${COMMIT_SHA}
 
 VOLUME [ "/csgo-sus" ]
 

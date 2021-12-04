@@ -2,6 +2,9 @@ import SteamID from 'steamid';
 import dotenv from 'dotenv';
 import { AxiosError } from 'axios';
 import TinyGradient from 'tinygradient';
+import fs from 'fs-extra';
+import path from 'path';
+import type { PackageJson } from 'types-package-json';
 import L from './logger';
 
 dotenv.config();
@@ -41,4 +44,18 @@ export const getScoreColor = (totalScore: number): string => {
   L.trace({ colorPos });
   const color = colorGradient.hsvAt(colorPos).toHexString();
   return color;
+};
+
+let packageJsonCache: PackageJson | undefined;
+export const packageJson = (): PackageJson => {
+  if (packageJsonCache) return packageJsonCache;
+  packageJsonCache = fs.readJSONSync(path.resolve(process.cwd(), `package.json`));
+  return packageJsonCache as PackageJson;
+};
+
+export const getVersion = (): string => {
+  const { COMMIT_SHA } = process.env;
+  let { version } = packageJson();
+  if (COMMIT_SHA) version = `${version}#${COMMIT_SHA}`;
+  return version;
 };
