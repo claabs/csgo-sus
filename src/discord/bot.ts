@@ -55,7 +55,7 @@ export function mapAnalysisDetailsToField(
         if (typeof value === 'number') {
           valueString = Number.isInteger(value) ? value.toString() : value.toFixed(2);
         } else valueString = value.toString();
-        return `${acc}• ${key}: ${valueString}\n`;
+        return `${acc}**${key}:** ${valueString}\n`;
       } catch {
         return acc;
       }
@@ -86,13 +86,13 @@ export function analysisToEmbed(analysis: PlayerAnalysis): MessageEmbed {
       value: roundedTotalScore.toString(),
     },
   ];
-  L.trace('Mapping positive fields');
-  const positiveFields = mapAnalysisDetailsToField('✅', analysis.positiveAnalyses);
-  if (positiveFields && positiveFields.length) fields.push(...positiveFields);
   L.trace('Mapping negative fields');
   const negativeFields = mapAnalysisDetailsToField('❗', analysis.negativeAnalyses);
   L.trace('Pusing negative fields');
   if (negativeFields && negativeFields.length) fields.push(...negativeFields);
+  L.trace('Mapping positive fields');
+  const positiveFields = mapAnalysisDetailsToField('✅', analysis.positiveAnalyses);
+  if (positiveFields && positiveFields.length) fields.push(...positiveFields);
 
   L.trace('Creating embed');
   const embed = new MessageEmbed({

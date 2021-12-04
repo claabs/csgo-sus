@@ -5,12 +5,33 @@ import { Analysis } from './common';
 import L from '../common/logger';
 
 export interface RankAnalysis extends Analysis {
-  currentRank?: MatchmakingRank;
-  bestRank?: MatchmakingRank;
+  currentRank?: string;
+  bestRank?: string;
   derankRate?: string;
   bestToCurrentRankDifferenceScore?: string;
   derankRateScore?: string;
 }
+
+const rankName: Record<MatchmakingRank, string> = {
+  1: 'Silver 1 (1)',
+  2: 'Silver 2 (2)',
+  3: 'Silver 3 (3)',
+  4: 'Silver 4 (4)',
+  5: 'Silver Elite (5)',
+  6: 'Silver Elite Master (6)',
+  7: 'Gold Nova 1 (7)',
+  8: 'Gold Nova 2 (8)',
+  9: 'Gold Nova 3 (9)',
+  10: 'Gold Nova Master (10)',
+  11: 'Master Guardian 1 (11)',
+  12: 'Master Guardian 2 (12)',
+  13: 'Master Guardian Elite (13)',
+  14: 'Distinguished Master Guardian (14)',
+  15: 'Legendary Eagle (15)',
+  16: 'Legendary Eagle Master (16)',
+  17: 'Supreme Master First Class (17)',
+  18: 'Global Elite (18)',
+};
 
 const BEST_TO_CURRENT_RANK_DIFF_MULTIPLIER = -10;
 const BEST_TO_CURRENT_RANK_DIFF_OFFSET = 30;
@@ -20,14 +41,16 @@ const NO_DERANK_SCORE = 0;
 const NO_DATA_SCORE = -10;
 
 export const analyzeRank = (player: PlayerData): RankAnalysis => {
-  const bestRank = player.csgoStatsPlayer?.summary.bestRank;
-  const currentRank = player.csgoStatsPlayer?.summary.currentRank;
+  const bestRankValue = player.csgoStatsPlayer?.summary.bestRank;
+  const currentRankValue = player.csgoStatsPlayer?.summary.currentRank;
   const rawData = player.csgoStatsPlayer?.graphs?.rawData;
   let score: number;
   let derankRate: string | undefined;
   let rankDifferenceScore: string | undefined;
   let derankRateScore: string | undefined;
-  if (rawData && bestRank && currentRank) {
+  const bestRank: string | undefined = bestRankValue ? rankName[bestRankValue] : undefined;
+  const currentRank: string | undefined = currentRankValue ? rankName[currentRankValue] : undefined;
+  if (rawData && bestRankValue && currentRankValue) {
     const reversedRawData = rawData.reverse();
     // const recentBestRankIndex = reversedRawData.findIndex((point) => point.rank === bestRank); // Can't use this since sometimes the best rank doesn't show on the graph...
     // const recentBestRankPoint = reversedRawData[recentBestRankIndex];
@@ -39,7 +62,7 @@ export const analyzeRank = (player: PlayerData): RankAnalysis => {
       }
       return recentBestRank;
     });
-    if (recentBestRankPoint.rank > currentRank) {
+    if (recentBestRankPoint.rank > currentRankValue) {
       // ⬆ This should catch the reduce on an empty array
       const recentWorstRankPoint = reversedRawData
         .slice(0, recentBestRankIndex)
@@ -56,7 +79,7 @@ export const analyzeRank = (player: PlayerData): RankAnalysis => {
         const worstRankDate = moment(recentWorstRankPoint.date, 'YYYY-MM-DD HH:mm:ss'); // 2017-10-27 00:51:10
         const derankDuration = worstRankDate.diff(bestRankDate, 'months', true); // Returns floating point number of months
         const derankRateValue = derankAmount / derankDuration;
-        const bestRankToCurrentRankDifference = recentBestRankPoint.rank - currentRank; // 2 is reasonable
+        const bestRankToCurrentRankDifference = recentBestRankPoint.rank - currentRankValue; // 2 is reasonable
         // score = -10 * bestRankToCurrentRankDifference + 30
         // 1 is fine        20
         // 2 is okay        10
