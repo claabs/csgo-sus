@@ -66,7 +66,7 @@ export const analyzePlayer = (player: PlayerData): PlayerAnalysis => {
   return {
     nickname: player.summary?.nickname,
     profileLink: player.summary?.url,
-    profileImage: player.summary?.avatar.small,
+    profileImage: player.summary?.avatar.medium,
     steamId: player.steamId,
     analyses,
     positiveAnalyses,
