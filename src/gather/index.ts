@@ -111,7 +111,7 @@ export const getDeepPlayedWith = async (
   return { root: rootPlayedWith, deep: deepPlayedWith };
 };
 
-export const getPlayersData = async (steamIds: SteamID[]): Promise<PlayerData[]> => {
+export const getPlayersData = async (steamIds: SteamID[]): Promise<Promise<PlayerData>[]> => {
   // These APIs support multiple players at once
   const steamIds64 = steamIds.map((id) => id.getSteamID64());
   const [playerSummaries, playerBans] = await Promise.all([
@@ -159,10 +159,9 @@ export const getPlayersData = async (steamIds: SteamID[]): Promise<PlayerData[]>
       faceit: await faceIt.getFaceitData(steamId.getSteamID64()).catch(logError),
     };
   });
-  const playerData = await Promise.all(playerDataPromises);
   // await (await scraper.handler.createAgent()).close(); // Temp fix for: https://github.com/ulixee/secret-agent/issues/394
   // await scraper.close();
-  return playerData;
+  return playerDataPromises;
 };
 
 export const getPlayerData = async (resolvableId: string): Promise<PlayerData> => {

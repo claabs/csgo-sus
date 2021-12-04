@@ -47,33 +47,34 @@ export interface PlayerAnalysis {
   totalScore: number;
 }
 
+export const analyzePlayer = (player: PlayerData): PlayerAnalysis => {
+  const analyses: AnalysisSummary = {
+    accountAge: analyzeAccountAge(player),
+    steamLevel: analyzeSteamLevel(player),
+    inventoryValue: analyzeInventoryValue(player),
+    ownedGames: analyzeOwnedGames(player),
+    csgoCollectibles: analyzeCSGOCollectibles(player),
+    rank: analyzeRank(player),
+  };
+  const totalScore = Object.values(analyses).reduce((acc, curr) => acc + curr.score, 0);
+  const positiveAnalyses = Object.entries(analyses)
+    .filter(([, val]) => val.score >= 0)
+    .sort(([, val1], [, val2]) => val1.score - val2.score) as AnalysesEntry[];
+  const negativeAnalyses = Object.entries(analyses)
+    .filter(([, val]) => val.score < 0)
+    .sort(([, val1], [, val2]) => val2.score - val1.score) as AnalysesEntry[];
+  return {
+    nickname: player.summary?.nickname,
+    profileLink: player.summary?.url,
+    profileImage: player.summary?.avatar.small,
+    steamId: player.steamId,
+    analyses,
+    positiveAnalyses,
+    negativeAnalyses,
+    totalScore,
+  };
+};
+
 export const analyzePlayers = (players: PlayerData[]): PlayerAnalysis[] => {
-  const analyzedPlayers: PlayerAnalysis[] = players.map((player) => {
-    const analyses: AnalysisSummary = {
-      accountAge: analyzeAccountAge(player),
-      steamLevel: analyzeSteamLevel(player),
-      inventoryValue: analyzeInventoryValue(player),
-      ownedGames: analyzeOwnedGames(player),
-      csgoCollectibles: analyzeCSGOCollectibles(player),
-      rank: analyzeRank(player),
-    };
-    const totalScore = Object.values(analyses).reduce((acc, curr) => acc + curr.score, 0);
-    const positiveAnalyses = Object.entries(analyses)
-      .filter(([, val]) => val.score >= 0)
-      .sort(([, val1], [, val2]) => val1.score - val2.score) as AnalysesEntry[];
-    const negativeAnalyses = Object.entries(analyses)
-      .filter(([, val]) => val.score < 0)
-      .sort(([, val1], [, val2]) => val2.score - val1.score) as AnalysesEntry[];
-    return {
-      nickname: player.summary?.nickname,
-      profileLink: player.summary?.url,
-      profileImage: player.summary?.avatar.small,
-      steamId: player.steamId,
-      analyses,
-      positiveAnalyses,
-      negativeAnalyses,
-      totalScore,
-    };
-  });
-  return analyzedPlayers;
+  return players.map((player) => analyzePlayer(player));
 };

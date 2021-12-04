@@ -1,7 +1,14 @@
-import { Client, ColorResolvable, EmbedFieldData, Intents, MessageEmbed } from 'discord.js';
+import {
+  Client,
+  ColorResolvable,
+  EmbedFieldData,
+  Intents,
+  MessageEmbed,
+  MessageOptions,
+} from 'discord.js';
 import dotenv from 'dotenv';
 import SteamID from 'steamid';
-import { AnalysesEntry, analyzePlayers, PlayerAnalysis } from '../analyze';
+import { AnalysesEntry, analyzePlayer, analyzePlayers, PlayerAnalysis } from '../analyze';
 import { parseStatus } from '../common/util';
 import { getPlayerData, getPlayersData } from '../gather';
 import { deployCommands } from './deploy-commands';
@@ -108,18 +115,38 @@ export function analysisToEmbed(analysis: PlayerAnalysis): MessageEmbed {
     // description: `${analysis.steamId.steam2()}/${analysis.steamId.steam3()}/${analysis.steamId.getSteamID64()}`,
     fields,
   });
-  L.debug({ embed }, 'Created embed');
+  L.trace({ embed }, 'Created embed');
   return embed;
 }
 
-export async function investigateSteamIds(steamIds: SteamID[]): Promise<MessageEmbed[]> {
-  L.debug({ steamIds }, 'Detected some steam IDs');
-  const playersData = await getPlayersData(steamIds);
-  L.debug('Gathered player data. Analyzing...');
-  const analyzedResults = analyzePlayers(playersData);
-  L.trace('Mapping results to embeds');
-  const embeds = analyzedResults.map(analysisToEmbed);
-  return embeds;
+export async function investigateSteamIds(
+  steamIds: SteamID[],
+  editReply: (opts: MessageOptions) => Promise<unknown>
+): Promise<void> {
+  const embeds: MessageEmbed[] = [];
+  L.debug({ steamIds: steamIds.map((id) => id.getSteamID64()) }, 'Detected some steam IDs');
+  L.debug('Gathering and analyzing players');
+  const playersDataPromises = await getPlayersData(steamIds);
+  await Promise.all(
+    playersDataPromises.map((promise) =>
+      promise.then(async (playerData) => {
+        L.debug(`Finished gathering for ${playerData.summary?.nickname}`);
+        const analysis = analyzePlayer(playerData);
+        const embed = analysisToEmbed(analysis);
+        embeds.push(embed);
+        L.debug(`Editing reply with ${embeds.length} embeds`);
+        const editOpts: MessageOptions = {
+          embeds,
+        };
+        if (embeds.length === steamIds.length)
+          editOpts.content = `Investigated ${steamIds.length} users:`;
+        await editReply(editOpts);
+        L.debug(`Finished editing with ${embeds.length} embeds`);
+      })
+    )
+  );
+
+  L.trace('Finished investigation');
 }
 
 try {
@@ -128,9 +155,8 @@ try {
     if (steamIds.length < 2) return;
     // Send a message containing the status message (if the bot has message permissions)
     L.info(`Detected ${steamIds.length} steamIds in a message, investigating...`);
-    await message.channel.sendTyping();
-    const embeds = await investigateSteamIds(steamIds);
-    await message.reply({ embeds });
+    const reply = await message.reply(`Investigating ${steamIds.length} users...`);
+    await investigateSteamIds(steamIds, reply.edit.bind(reply));
   });
 
   client.on('interactionCreate', async (interaction) => {
@@ -144,9 +170,7 @@ try {
         if (!steamIds.length) return;
         L.trace('Deferring reply');
         await interaction.deferReply();
-        const embeds = await investigateSteamIds(steamIds);
-        L.trace('editing reply');
-        await interaction.editReply({ embeds });
+        await investigateSteamIds(steamIds, interaction.editReply.bind(interaction));
       }
     } else if (interaction.isCommand()) {
       const { commandName } = interaction;
