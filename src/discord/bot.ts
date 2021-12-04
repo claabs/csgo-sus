@@ -162,7 +162,7 @@ try {
   client.on('interactionCreate', async (interaction) => {
     if (interaction.isContextMenu()) {
       const { commandName } = interaction;
-      if (commandName === 'Investigate status output') {
+      if (commandName === 'Investigate status') {
         // Right click on a message containing a status message
         const message = interaction.options.getMessage('message', true);
         const steamIds = parseStatus(message.content);
@@ -194,6 +194,37 @@ try {
         } catch (err) {
           L.error(err);
         }
+      }
+      if (commandName === 'help') {
+        // Use the /help command
+        L.info(`Responding to /help command`);
+        const embed = new MessageEmbed({
+          author: {
+            name: 'csgos.us',
+            url: 'https://csgos.us',
+          },
+          title: 'Help',
+          fields: [
+            {
+              name: 'Invesigate with a message',
+              value: `To investigate multiple players in your game:
+ • In CSGO: type \`status\` in console and copy the list of players
+ • Paste it as a message in Discord and wait for the results`,
+            },
+            {
+              name: 'Invesigate with a right click',
+              value: `If this Discord bot doesn't have permission to read messages, you can still use it:
+ • In CSGO: type \`status\` in console and copy the list of players
+ • Paste it as a message in Discord
+ • Right click the message > Apps > Investigate status`,
+            },
+            {
+              name: 'Invesigate a single user',
+              value: `Use the \`/user\` command and provide any SteamID version or profile link`,
+            },
+          ],
+        });
+        await interaction.reply({ embeds: [embed] });
       }
     }
   });
