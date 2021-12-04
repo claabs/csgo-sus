@@ -40,7 +40,8 @@
     "source-map-support": "^0.5.19",
     "steamapi": "^2.2.0",
     "steamcommunity-inventory": "^2.0.5",
-    "steamid": "^2.0.0"
+    "steamid": "^2.0.0",
+    "tinygradient": "^1.1.5"
   },
   "devDependencies": {
     "@types/fs-extra": "^9.0.13",

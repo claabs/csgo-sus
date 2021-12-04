@@ -1,6 +1,8 @@
 import SteamID from 'steamid';
 import dotenv from 'dotenv';
 import { AxiosError } from 'axios';
+import TinyGradient from 'tinygradient';
+import L from './logger';
 
 dotenv.config();
 
@@ -21,4 +23,22 @@ export const cleanAxiosResponse = (err: AxiosError) => {
     headers: response?.headers,
     data: response?.data,
   };
+};
+
+export const getScoreColor = (totalScore: number): string => {
+  const MIN_SCORE = -100;
+  const MAX_SCORE = 500;
+  const SCORE_RANGE = Math.abs(MIN_SCORE) + Math.abs(MAX_SCORE);
+  const ZERO_POS = Math.abs(MIN_SCORE) / SCORE_RANGE;
+  const colorGradient = new TinyGradient([
+    { color: '#222222', pos: 0 },
+    { color: 'red', pos: ZERO_POS / 2 },
+    { color: 'yellow', pos: ZERO_POS },
+    { color: 'blue', pos: 1 },
+  ]);
+  const colorPos =
+    (Math.min(MAX_SCORE, Math.max(MIN_SCORE, totalScore)) + SCORE_RANGE * ZERO_POS) / SCORE_RANGE;
+  L.trace({ colorPos });
+  const color = colorGradient.hsvAt(colorPos).toHexString();
+  return color;
 };

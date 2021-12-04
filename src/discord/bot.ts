@@ -9,7 +9,7 @@ import {
 import dotenv from 'dotenv';
 import SteamID from 'steamid';
 import { AnalysesEntry, analyzePlayer, analyzePlayers, PlayerAnalysis } from '../analyze';
-import { parseStatus } from '../common/util';
+import { getScoreColor, parseStatus } from '../common/util';
 import { getPlayerData, getPlayersData } from '../gather';
 import { deployCommands } from './deploy-commands';
 import L from '../common/logger';
@@ -74,16 +74,9 @@ export function mapAnalysisDetailsToField(
 
 export function analysisToEmbed(analysis: PlayerAnalysis): MessageEmbed {
   const { totalScore } = analysis;
-  let color: ColorResolvable;
-  // TODO: make this a floating gradient, not buckets
-  if (totalScore < -150) color = 'NOT_QUITE_BLACK';
-  else if (totalScore < -50) color = 'DARK_RED';
-  else if (totalScore < 0) color = 'RED';
-  else if (totalScore < 10) color = 'ORANGE';
-  else if (totalScore < 100) color = 'GREEN';
-  else color = 'DARK_GREEN';
 
-  L.trace({ color }, 'Chose color');
+  const color = getScoreColor(totalScore) as ColorResolvable;
+  L.trace({ color, nickname: analysis.nickname }, 'Chose color');
 
   const roundedTotalScore = totalScore > 0 ? Math.ceil(totalScore) : Math.floor(totalScore);
   const fields: EmbedFieldData[] = [
