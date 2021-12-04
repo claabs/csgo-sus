@@ -6,6 +6,7 @@ import { analyzeInventoryValue, InventoryValueAnalysis } from './inventory-value
 import { analyzeOwnedGames, OwnedGamesAnalysis } from './owned-games';
 import { analyzeCSGOCollectibles, CSGOCollectiblesAnalysis } from './csgo-collectibles';
 import { analyzeRank, RankAnalysis } from './rank';
+import { analyzeGameHours, GameHoursAnalysis } from './game-hours';
 
 /**
  * Account age
@@ -32,6 +33,7 @@ export interface AnalysisSummary {
   ownedGames: OwnedGamesAnalysis;
   csgoCollectibles: CSGOCollectiblesAnalysis;
   rank: RankAnalysis;
+  gameHours: GameHoursAnalysis;
 }
 
 export type AnalysesEntry = [keyof AnalysisSummary, AnalysisSummary[keyof AnalysisSummary]];
@@ -55,14 +57,15 @@ export const analyzePlayer = (player: PlayerData): PlayerAnalysis => {
     ownedGames: analyzeOwnedGames(player),
     csgoCollectibles: analyzeCSGOCollectibles(player),
     rank: analyzeRank(player),
+    gameHours: analyzeGameHours(player),
   };
   const totalScore = Object.values(analyses).reduce((acc, curr) => acc + curr.score, 0);
   const positiveAnalyses = Object.entries(analyses)
     .filter(([, val]) => val.score >= 0)
-    .sort(([, val1], [, val2]) => val1.score - val2.score) as AnalysesEntry[];
+    .sort(([, val1], [, val2]) => val2.score - val1.score) as AnalysesEntry[];
   const negativeAnalyses = Object.entries(analyses)
     .filter(([, val]) => val.score < 0)
-    .sort(([, val1], [, val2]) => val2.score - val1.score) as AnalysesEntry[];
+    .sort(([, val1], [, val2]) => val1.score - val2.score) as AnalysesEntry[];
   return {
     nickname: player.summary?.nickname,
     profileLink: player.summary?.url,
