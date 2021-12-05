@@ -7,6 +7,7 @@ import { analyzeOwnedGames, OwnedGamesAnalysis } from './owned-games';
 import { analyzeCSGOCollectibles, CSGOCollectiblesAnalysis } from './csgo-collectibles';
 import { analyzeRank, RankAnalysis } from './rank';
 import { analyzeGameHours, GameHoursAnalysis } from './game-hours';
+import { analyzeCompMatchWins, CompMatchWinsAnalysis } from './comp-match-count';
 
 /**
  * Account age
@@ -34,6 +35,7 @@ export interface AnalysisSummary {
   csgoCollectibles: CSGOCollectiblesAnalysis;
   rank: RankAnalysis;
   gameHours: GameHoursAnalysis;
+  competitiveWins: CompMatchWinsAnalysis;
 }
 
 export type AnalysesEntry = [keyof AnalysisSummary, AnalysisSummary[keyof AnalysisSummary]];
@@ -58,6 +60,7 @@ export const analyzePlayer = (player: PlayerData): PlayerAnalysis => {
     csgoCollectibles: analyzeCSGOCollectibles(player),
     rank: analyzeRank(player),
     gameHours: analyzeGameHours(player),
+    competitiveWins: analyzeCompMatchWins(player),
   };
   const totalScore = Object.values(analyses).reduce((acc, curr) => acc + curr.score, 0);
   const positiveAnalyses = Object.entries(analyses)
