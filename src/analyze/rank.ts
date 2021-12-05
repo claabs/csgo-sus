@@ -8,8 +8,6 @@ export interface RankAnalysis extends Analysis {
   currentRank?: string;
   bestRank?: string;
   derankRate?: string;
-  bestToCurrentRankDifferenceScore?: string;
-  derankRateScore?: string;
 }
 
 const rankName: Record<MatchmakingRank, string> = {
@@ -46,8 +44,6 @@ export const analyzeRank = (player: PlayerData): RankAnalysis => {
   const rawData = player.csgoStatsPlayer?.graphs?.rawData;
   let score: number;
   let derankRate: string | undefined;
-  let rankDifferenceScore: string | undefined;
-  let derankRateScore: string | undefined;
   const bestRank: string | undefined = bestRankValue ? rankName[bestRankValue] : undefined;
   const currentRank: string | undefined = currentRankValue ? rankName[currentRankValue] : undefined;
   if (rawData && bestRankValue && currentRankValue) {
@@ -87,7 +83,7 @@ export const analyzeRank = (player: PlayerData): RankAnalysis => {
         // 4 is bad         -10
         const bestToCurrentRankDifferenceScoreNum =
           bestRankToCurrentRankDifference * BEST_TO_CURRENT_RANK_DIFF_MULTIPLIER +
-          BEST_TO_CURRENT_RANK_DIFF_OFFSET;
+          BEST_TO_CURRENT_RANK_DIFF_OFFSET; // TODO: take time since best rank into account (e.g. 4 years)
         // score = -10 * derankRateValue + 15
         // Drop 1 rank in a month: 5
         // Drop 2 ranks in a month: -5
@@ -105,8 +101,6 @@ export const analyzeRank = (player: PlayerData): RankAnalysis => {
           rankScore: score,
         });
         derankRate = `${derankAmount} ranks ${bestRankDate.to(worstRankDate)}`;
-        rankDifferenceScore = bestToCurrentRankDifferenceScoreNum.toFixed(2);
-        derankRateScore = derankRateScoreNum.toFixed(2);
       }
     } else {
       score = NO_DERANK_SCORE;
@@ -118,8 +112,6 @@ export const analyzeRank = (player: PlayerData): RankAnalysis => {
     currentRank,
     bestRank,
     derankRate,
-    bestToCurrentRankDifferenceScore: rankDifferenceScore,
-    derankRateScore,
     score,
   };
 };

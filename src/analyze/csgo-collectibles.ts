@@ -7,8 +7,6 @@ export interface CSGOCollectiblesAnalysis extends Analysis {
   csgoCollectiblesCount?: number;
   oldestCSGOCollectibleAgo?: string;
   oldestCSGOCollectibleDate?: string;
-  collectibleAgeScore?: number;
-  collectibleCountScore?: number;
 }
 
 export interface EconItemWithDate extends EconItem {
@@ -75,8 +73,6 @@ export const analyzeCSGOCollectibles = (player: PlayerData): CSGOCollectiblesAna
     csgoCollectiblesCount,
     oldestCSGOCollectibleAgo,
     oldestCSGOCollectibleDate,
-    collectibleAgeScore,
-    collectibleCountScore,
     score,
   };
 };
