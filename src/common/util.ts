@@ -56,6 +56,6 @@ export const packageJson = (): PackageJson => {
 export const getVersion = (): string => {
   const { COMMIT_SHA } = process.env;
   let { version } = packageJson();
-  if (COMMIT_SHA) version = `${version}#${COMMIT_SHA}`;
+  if (COMMIT_SHA) version = `${version}#${COMMIT_SHA.substring(0, 8)}`;
   return version;
 };
