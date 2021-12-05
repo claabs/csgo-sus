@@ -3,7 +3,7 @@ import { Analysis } from './common';
 
 export interface PlayerBansAnalysis extends Analysis {
   communityBanned?: boolean;
-  economyBan?: string;
+  economyBan?: boolean;
   vacBans?: number;
   gameBans?: number;
   daysSinceLastBan?: number;
@@ -17,11 +17,11 @@ const BAN_LENGTH_OFFSET = 365 * 3; // 3 years incurs no recency penalty
 export const analyzePlayerBans = (player: PlayerData): PlayerBansAnalysis => {
   const { playerBans } = player;
   let score = 0;
-  const communityBanned = playerBans?.communityBanned;
-  const economyBan = playerBans?.economyBan;
-  const vacBans = playerBans?.vacBans;
-  const gameBans = playerBans?.gameBans;
-  const daysSinceLastBan = playerBans?.daysSinceLastBan;
+  const communityBanned = playerBans?.communityBanned || undefined;
+  const economyBan = playerBans?.economyBan !== 'none' || undefined;
+  const vacBans = playerBans?.vacBans || undefined;
+  const gameBans = playerBans?.gameBans || undefined;
+  const daysSinceLastBan = playerBans?.daysSinceLastBan || undefined;
   if (playerBans) {
     if (communityBanned) score -= 15;
     if (economyBan) score -= 30;
