@@ -20,7 +20,7 @@ export const analyzeGameHours = (player: PlayerData): GameHoursAnalysis => {
   let total: number | undefined;
   let last2Weeks: number | undefined;
   let score: number;
-  if (gameDetails) {
+  if (gameDetails && gameDetails.playTime > 0) {
     total = gameDetails.playTime / 60;
     last2Weeks = gameDetails.playTime2 / 60;
     score = Math.min(total, MAXIMUM_HOURS) * HOUR_SCORE_MULTIPLIER + OFFSET;
