@@ -7,6 +7,7 @@
     "build": "rimraf dist && tsc",
     "lint": "tsc --noEmit && eslint src/**/*.ts",
     "start": "ts-node src/index.ts",
+    "charts": "ts-node src/charts/generate.ts",
     "docker:build": "docker build . -t ghcr.io/claabs/csgo-sus:latest --target deploy",
     "docker:run": "mkdir -p volume && chmod 777 volume && docker run --rm -ti --security-opt seccomp=\"https://raw.githubusercontent.com/ulixee/secret-agent/main/tools/docker/seccomp_profile.json\" -v $(pwd)/volume:/csgo-sus --env-file .env ghcr.io/claabs/csgo-sus:latest"
   },
