@@ -34,28 +34,29 @@ const rankName: Record<MatchmakingRank, string> = {
   18: 'Global Elite (18)',
 };
 
-const BEST_TO_CURRENT_RANK_DIFF_MULTIPLIER = -15;
-const BEST_TO_CURRENT_RANK_DIFF_OFFSET = 30;
-const DERANK_RATE_SCORE_MUILTIPLIER = -10;
-const DERANK_RATE_SCORE_OFFSET = 15;
+const LONG_TERM_DERANK_MULTIPLIER = -15;
+const LONG_TERM_DERANK_OFFSET = 30;
+const LONG_TERM_DERANK_MINIMUM_YEARS = 1;
+const WORST_DERANK_RATE_SCORE_MUILTIPLIER = -10;
+const WORST_DERANK_RATE_SCORE_OFFSET = 15;
 const NO_DERANK_SCORE = 0;
 const NO_DATA_SCORE = -10;
 
-const derankRateScoreFunction = (deranksPerMonth: number): number => {
+const worstDerankRateScoreFunction = (deranksPerMonth: number): number => {
   // score = -10 * deranksPerMonth + 15
   // Drop 1 rank in a month: 5
   // Drop 2 ranks in a month: -5
   // Drop 3 ranks in a month: -15
   // Drop 4 ranks in a month: -25
-  return deranksPerMonth * DERANK_RATE_SCORE_MUILTIPLIER + DERANK_RATE_SCORE_OFFSET;
+  return deranksPerMonth * WORST_DERANK_RATE_SCORE_MUILTIPLIER + WORST_DERANK_RATE_SCORE_OFFSET;
 };
-const bestToCurrentRankDifferenceRateScoreFunction = (deranksPerYear: number): number => {
+const longTermDerankRateScoreFunction = (deranksPerYear: number): number => {
   // score = -15 * deranksPerYear + 30
   // 1 -> 15
   // 2 -> 0
   // 3 -> -15
   // 4 -> -30
-  return deranksPerYear * BEST_TO_CURRENT_RANK_DIFF_MULTIPLIER + BEST_TO_CURRENT_RANK_DIFF_OFFSET;
+  return deranksPerYear * LONG_TERM_DERANK_MULTIPLIER + LONG_TERM_DERANK_OFFSET;
 };
 
 export const analyzeRank = (player: PlayerData): RankAnalysis => {
@@ -98,20 +99,26 @@ export const analyzeRank = (player: PlayerData): RankAnalysis => {
         const derankDuration = worstRankDate.diff(bestRankDate, 'months', true); // Returns floating point number of months
         const derankRateValue = derankAmount / derankDuration;
         const bestRankToCurrentRankDifference = recentBestRankPoint.rank - currentRankValue;
-        const bestRankToCurrentRankDifferencePerYear =
-          bestRankToCurrentRankDifference / moment().diff(bestRankDate, 'years', true); // Returns floating point number of months
-        const bestToCurrentRankDifferenceRateScore = bestToCurrentRankDifferenceRateScoreFunction(
-          bestRankToCurrentRankDifferencePerYear
-        );
+        const yearsSinceBestRank = moment().diff(bestRankDate, 'years', true); // Returns floating point number of years
+        let longTermDerankRateScore = 0;
+        if (yearsSinceBestRank > LONG_TERM_DERANK_MINIMUM_YEARS) {
+          const bestRankToCurrentRankDifferencePerYear =
+            bestRankToCurrentRankDifference / yearsSinceBestRank;
+          longTermDerankRateScore = longTermDerankRateScoreFunction(
+            bestRankToCurrentRankDifferencePerYear
+          );
+        }
 
-        const derankRateScore = derankRateScoreFunction(derankRateValue);
+        const derankRateScore = worstDerankRateScoreFunction(derankRateValue);
 
-        score = Math.min(bestToCurrentRankDifferenceRateScore + derankRateScore, 0); // Cap at 0
+        score = Math.min(longTermDerankRateScore + derankRateScore, 0); // Cap at 0
         L.debug({
           bestRankDate: bestRankDate.toISOString(),
           worstRankDate: worstRankDate.toISOString(),
           derankDuration,
           derankRateValue,
+          longTermDerankRateScore,
+          derankRateScore,
           rankScore: score,
         });
         worstDerankRate = `${derankAmount} ranks ${bestRankDate.to(worstRankDate)}`;
@@ -133,7 +140,7 @@ export const analyzeRank = (player: PlayerData): RankAnalysis => {
 
 const plotDerankRateData = (): ScorePlotData => {
   const x = range(0, 20);
-  const y = x.map((xVal) => derankRateScoreFunction(xVal));
+  const y = x.map((xVal) => worstDerankRateScoreFunction(xVal));
   return {
     title: 'Worst Derank Period Rate',
     x,
@@ -143,9 +150,9 @@ const plotDerankRateData = (): ScorePlotData => {
 };
 const plotBestToCurrentRankDifferenceRateData = (): ScorePlotData => {
   const x = range(0, 20);
-  const y = x.map((xVal) => bestToCurrentRankDifferenceRateScoreFunction(xVal));
+  const y = x.map((xVal) => longTermDerankRateScoreFunction(xVal));
   return {
-    title: 'Best to Current Rank Derank Rate',
+    title: 'Best to Current Rank Derank Rate (when best rank was more than a year ago)',
     x,
     xAxisLabel: 'Deranks per year',
     y,
