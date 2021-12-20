@@ -46,7 +46,9 @@ export function mapAnalysisDetailsToField(
   if (!analyses || !analyses.length) return [];
   const fields: (EmbedFieldData | null)[] = analyses.map(([analysisType, details]) => {
     L.trace({ analysisType, details });
-    const detailsEntries = Object.entries(details).filter(([key]) => key !== 'score');
+    const detailsEntries = Object.entries(details).filter(
+      ([key]) => !['score', 'link'].includes(key)
+    );
     L.trace({ detailsEntries });
     if (!detailsEntries || !detailsEntries.length) return null;
     const detailsList = detailsEntries.reduce((acc, [key, value]) => {
@@ -63,8 +65,9 @@ export function mapAnalysisDetailsToField(
     L.trace({ detailsList });
 
     if (!detailsList) return null;
+    const fieldName = details.link ? `[${analysisType}](${details.link})` : analysisType;
     const field: EmbedFieldData = {
-      name: `${prefixSymbol}${analysisType}`,
+      name: `${prefixSymbol}${fieldName}`,
       value: detailsList,
     };
     L.trace({ field }, 'Mapped analysis detail to field');
