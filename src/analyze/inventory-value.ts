@@ -16,8 +16,7 @@ export const analyzeInventoryValue = (player: PlayerData): InventoryValueAnalysi
   let fixedInventoryValue: string | undefined;
   let marketableItemsCount: number | undefined;
   let score: number;
-  const link =
-    player.summary?.profileUrl && items ? `${player.summary?.profileUrl}inventory/#730` : undefined;
+  const link = player.summary?.url && items ? `${player.summary?.url}inventory/#730` : undefined;
   if (items?.length) {
     const valueDollars = items.reduce((accum, item) => {
       const itemPrice = item.price || 0;
