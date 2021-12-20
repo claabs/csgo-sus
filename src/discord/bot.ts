@@ -51,6 +51,7 @@ export function mapAnalysisDetailsToField(
     );
     L.trace({ detailsEntries });
     if (!detailsEntries || !detailsEntries.length) return null;
+    const detailsListPrefix = details.link ? `[Details...](${details.link})\n` : '';
     const detailsList = detailsEntries.reduce((acc, [key, value]) => {
       let valueString: string;
       try {
@@ -61,13 +62,12 @@ export function mapAnalysisDetailsToField(
       } catch {
         return acc;
       }
-    }, '');
+    }, detailsListPrefix);
     L.trace({ detailsList });
 
     if (!detailsList) return null;
-    const fieldName = details.link ? `[${analysisType}](${details.link})` : analysisType;
     const field: EmbedFieldData = {
-      name: `${prefixSymbol}${fieldName}`,
+      name: `${prefixSymbol}${analysisType}`,
       value: detailsList,
     };
     L.trace({ field }, 'Mapped analysis detail to field');
