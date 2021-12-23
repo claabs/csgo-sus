@@ -118,6 +118,7 @@ export function analysisToEmbed(analysis: PlayerAnalysis): MessageEmbed {
 
 export async function investigateSteamIds(
   steamIds: SteamID[],
+  followUp: (opts: MessageOptions) => Promise<unknown>,
   editReply: (opts: MessageOptions) => Promise<unknown>
 ): Promise<void> {
   const embeds: MessageEmbed[] = [];
@@ -131,13 +132,10 @@ export async function investigateSteamIds(
         const analysis = analyzePlayer(playerData);
         const embed = analysisToEmbed(analysis);
         embeds.push(embed);
-        L.debug(`Editing reply with ${embeds.length} embeds`);
-        const editOpts: MessageOptions = {
-          embeds,
-        };
+        L.debug(`Following up reply with embed number ${embeds.length}`);
         if (embeds.length === steamIds.length)
-          editOpts.content = `Investigated ${steamIds.length} users:`;
-        await editReply(editOpts);
+          await editReply({ content: `Investigated ${steamIds.length} users:` });
+        await followUp({ embeds: [embed] });
         L.debug(`Finished editing with ${embeds.length} embeds`);
       })
     )
@@ -153,7 +151,7 @@ try {
     // Send a message containing the status message (if the bot has message permissions)
     L.info(`Detected ${steamIds.length} steamIds in a message, investigating...`);
     const reply = await message.reply(`Investigating ${steamIds.length} users...`);
-    await investigateSteamIds(steamIds, reply.edit.bind(reply));
+    await investigateSteamIds(steamIds, reply.reply.bind(reply), reply.edit.bind(reply));
   });
 
   client.on('interactionCreate', async (interaction) => {
@@ -167,7 +165,11 @@ try {
         if (!steamIds.length) return;
         L.trace('Deferring reply');
         await interaction.deferReply();
-        await investigateSteamIds(steamIds, interaction.editReply.bind(interaction));
+        await investigateSteamIds(
+          steamIds,
+          interaction.followUp.bind(interaction),
+          interaction.editReply.bind(interaction)
+        );
       }
     } else if (interaction.isCommand()) {
       const { commandName } = interaction;
