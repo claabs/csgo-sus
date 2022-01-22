@@ -6,7 +6,7 @@ import {
   MessageEmbed,
   MessageOptions,
 } from 'discord.js';
-import dotenv from 'dotenv';
+import 'dotenv/config';
 import SteamID from 'steamid';
 import type { PackageJsonPerson } from 'types-package-json';
 import { AnalysesEntry, analyzePlayer, analyzePlayers, PlayerAnalysis } from '../analyze';
@@ -14,8 +14,6 @@ import { getScoreColor, getVersion, packageJson, parseStatus } from '../common/u
 import { getPlayerData, getPlayersData } from '../gather';
 import { deployCommands } from './deploy-commands';
 import L from '../common/logger';
-
-dotenv.config();
 
 const token = process.env.DISCORD_BOT_TOKEN || 'missing';
 
@@ -39,12 +37,14 @@ function generateInviteUrl(): string {
   });
 }
 
-client.once('ready', () => {
-  L.info({ inviteUrl: generateInviteUrl() }, 'Discord bot logged in');
-});
+client.on('debug', (m) => L.trace(m));
+client.on('warn', (m) => L.warn(m));
+client.on('error', (m) => L.error(m));
 
-// Login to Discord with your client's token
-deployCommands().then(() => client.login(token));
+client.on('ready', async (readyClient) => {
+  L.info({ inviteUrl: generateInviteUrl() }, 'Discord bot logged in');
+  await deployCommands(readyClient.user.id);
+});
 
 export function mapAnalysisDetailsToField(
   prefixSymbol: string,
@@ -242,3 +242,5 @@ try {
 } catch (err) {
   L.error(err);
 }
+
+client.login(token);
