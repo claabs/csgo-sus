@@ -6,6 +6,21 @@ FROM node:16-bullseye-slim as base
 WORKDIR /usr/app
 
 ########
+# DEPS
+########
+FROM base as deps
+
+RUN apt-get update \
+    && apt-get install -y \
+    tini \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy package.json for version number
+COPY package*.json ./
+
+RUN npm ci --only=production && $(npx install-browser-deps)
+
+########
 # BUILD
 ########
 FROM base as build
@@ -25,17 +40,7 @@ RUN npm run build
 ########
 # DEPLOY
 ########
-FROM base as deploy
-
-RUN apt-get update \
-    && apt-get install -y \
-    tini \
-    && rm -rf /var/lib/apt/lists/*
-
-# Copy package.json for version number
-COPY package*.json ./
-
-RUN npm ci --only=production && $(npx install-browser-deps)
+FROM deps as deploy
 
 # Steal compiled code from build image
 COPY --from=build /usr/app/dist ./dist 
