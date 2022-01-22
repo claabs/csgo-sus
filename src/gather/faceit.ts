@@ -75,7 +75,7 @@ export interface FaceitData {
 export class FaceitCache {
   private cache = getCache({
     namespace: `faceit`,
-    ttl: 60 * 60 * 24 * 7, // 1 week
+    ttl: 1000 * 60 * 60 * 24 * 7, // 1 week
   });
 
   public async getFaceitData(steamId64: string): Promise<FaceitData | undefined> {

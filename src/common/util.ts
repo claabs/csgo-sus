@@ -69,7 +69,14 @@ export const range = (start: number, stop: number, step?: number): number[] => {
 };
 
 export interface GetCacheProps {
+  /**
+   * A prefix to add to the key
+   */
   namespace?: string;
+
+  /**
+   * Data expiration timeout in milliseconds
+   */
   ttl?: number;
 }
 

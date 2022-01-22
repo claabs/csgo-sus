@@ -10,7 +10,7 @@ import { getCache } from '../common/util';
 export class CSGOStatsGGScraperCache extends CSGOStatsGGScraper {
   private cache = getCache({
     namespace: `csgostatsgg-scraper`,
-    ttl: 60 * 60 * 24 * 7, // 1 week
+    ttl: 1000 * 60 * 60 * 24 * 7, // 1 week
   });
 
   public async getPlayedWith(

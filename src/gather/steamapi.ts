@@ -4,7 +4,7 @@ import { getCache } from '../common/util';
 export class SteamApiCache extends SteamAPI {
   private cache = getCache({
     namespace: `steamapi`,
-    ttl: 60 * 60 * 24, // 1 day
+    ttl: 1000 * 60 * 60 * 24, // 1 day
   });
 
   public async resolve(value: string): Promise<string> {

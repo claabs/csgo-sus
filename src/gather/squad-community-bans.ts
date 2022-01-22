@@ -55,7 +55,7 @@ export interface SquadBanResponse {
 export class SquadCommunityBansCache {
   private cache = getCache({
     namespace: `squad-community`,
-    ttl: 60 * 60 * 24 * 7, // 1 week
+    ttl: 1000 * 60 * 60 * 24 * 7, // 1 week
   });
 
   public async getReputation(steamId64: string): Promise<SquadBanResponse> {

@@ -30,7 +30,7 @@ export type ReputationSummary = 'none' | string;
 export class SteamRepCache {
   private cache = getCache({
     namespace: `steamrep`,
-    ttl: 60 * 60 * 24 * 7 * 4, // 4 weeks
+    ttl: 1000 * 60 * 60 * 24 * 7 * 4, // 4 weeks
   });
 
   public async getReputation(steamId64: string): Promise<ReputationSummary> {

@@ -27,7 +27,7 @@ export interface PriceCache {
 export class InventoryValueCache {
   private cache = getCache({
     namespace: `inventory-value`,
-    ttl: 60 * 60 * 24 * 7, // 1 week
+    ttl: 1000 * 60 * 60 * 24 * 7, // 1 week
   });
 
   private inventory: Inventory;
@@ -46,7 +46,7 @@ export class InventoryValueCache {
     const cacheKey = `market-price`;
     const cache = getCache({
       namespace: `csgo-prices`,
-      ttl: 60 * 60 * 24, // 1 day
+      ttl: 1000 * 60 * 60 * 24, // 1 day
     });
     if (!this.priceCache) {
       const data = await cache.get(cacheKey);
