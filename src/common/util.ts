@@ -1,5 +1,5 @@
 import SteamID from 'steamid';
-import dotenv from 'dotenv';
+import 'dotenv/config';
 import { AxiosError } from 'axios';
 import TinyGradient from 'tinygradient';
 import fs from 'fs-extra';
@@ -7,8 +7,6 @@ import path from 'path';
 import type { PackageJson } from 'types-package-json';
 import Keyv from 'keyv';
 import L from './logger';
-
-dotenv.config();
 
 export const parseStatus = (status: string): SteamID[] => {
   const steam2Ids = status.match(/(STEAM_[0-5]:[0-1]:[0-9]+)/g);
