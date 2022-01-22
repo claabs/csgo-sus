@@ -8,8 +8,9 @@ import { range } from '../common/util';
 
 export interface RankAnalysis extends Analysis {
   currentRank?: string;
-  bestRank?: string;
+  bestRankEver?: string;
   bestRankAgo?: string;
+  bestRankPastYear?: string;
   worstDerankRate?: string;
 }
 
@@ -42,6 +43,7 @@ const WORST_DERANK_RATE_SCORE_OFFSET = 15;
 const NO_DERANK_SCORE = 0;
 const NO_DATA_SCORE = -10;
 
+// TODO: scale worst derank rate to how long ago it occurred (like VAC ban)
 const worstDerankRateScoreFunction = (deranksPerMonth: number): number => {
   // score = -10 * deranksPerMonth + 15
   // Drop 1 rank in a month: 5
@@ -66,8 +68,9 @@ export const analyzeRank = (player: PlayerData): RankAnalysis => {
   let score: number;
   let worstDerankRate: string | undefined;
   let bestRankAgo: string | undefined;
-  const bestRank: string | undefined = bestRankValue ? rankName[bestRankValue] : undefined;
+  const bestRankEver: string | undefined = bestRankValue ? rankName[bestRankValue] : undefined;
   const currentRank: string | undefined = currentRankValue ? rankName[currentRankValue] : undefined;
+  let bestRankPastYear: string | undefined;
   const link = `https://csgostats.gg/player/${player.steamId.getSteamID64()}#/graphs`;
   if (rawData && bestRankValue && currentRankValue) {
     const reversedRawData = rawData.reverse();
@@ -81,6 +84,19 @@ export const analyzeRank = (player: PlayerData): RankAnalysis => {
       }
       return recentBestRank;
     });
+    let bestRankPastYearValue: MatchmakingRank | undefined;
+    reversedRawData.some((point) => {
+      if (moment().diff(moment(point.date, 'YYYY-MM-DD HH:mm:ss'), 'years', true) > 1) {
+        return true; // Break from loop
+      }
+      if (point.rank !== 0) {
+        if (!bestRankPastYearValue || point.rank > bestRankPastYearValue) {
+          bestRankPastYearValue = point.rank;
+        }
+      }
+      return false; // Continue loop
+    });
+    bestRankPastYear = bestRankPastYearValue ? rankName[bestRankPastYearValue] : undefined;
     if (recentBestRankPoint.rank > currentRankValue) {
       // ⬆ This should catch the reduce on an empty array
       const recentWorstRankPoint = reversedRawData
@@ -132,7 +148,8 @@ export const analyzeRank = (player: PlayerData): RankAnalysis => {
   }
   return {
     currentRank,
-    bestRank,
+    bestRankEver,
+    bestRankPastYear,
     bestRankAgo,
     worstDerankRate,
     score,
