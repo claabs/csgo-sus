@@ -32,8 +32,15 @@ const client = new Client({
   },
 });
 
+function generateInviteUrl(): string {
+  return client.generateInvite({
+    scopes: ['bot', 'applications.commands'],
+    permissions: ['VIEW_CHANNEL', 'SEND_MESSAGES', 'EMBED_LINKS'],
+  });
+}
+
 client.once('ready', () => {
-  L.info('Discord bot logged in');
+  L.info({ inviteUrl: generateInviteUrl() }, 'Discord bot logged in');
 });
 
 // Login to Discord with your client's token
