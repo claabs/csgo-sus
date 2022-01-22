@@ -1,7 +1,6 @@
 import { EconItem, Inventory } from 'steamcommunity-inventory';
-import Cache from 'hybrid-disk-cache';
 import axios from 'axios';
-import { getCacheDir } from '../common/util';
+import { getCache } from '../common/util';
 
 export interface ItemWithValue {
   marketName: string;
@@ -26,8 +25,8 @@ export interface PriceCache {
 }
 
 export class InventoryValueCache {
-  private cache = new Cache({
-    path: `${getCacheDir()}/csgo-sus-cache/inventory-value`,
+  private cache = getCache({
+    namespace: `inventory-value`,
     ttl: 60 * 60 * 24 * 7, // 1 week
   });
 
@@ -45,21 +44,21 @@ export class InventoryValueCache {
 
   private async getItemPrice(marketHashName: string): Promise<number | undefined> {
     const cacheKey = `market-price`;
-    const cache = new Cache({
-      path: `${getCacheDir()}/csgo-sus-cache/csgo-prices`,
+    const cache = getCache({
+      namespace: `csgo-prices`,
       ttl: 60 * 60 * 24, // 1 day
     });
     if (!this.priceCache) {
       const data = await cache.get(cacheKey);
       if (data) {
-        this.priceCache = JSON.parse(data.toString());
+        this.priceCache = data;
       } else {
         // https://csgotrader.app/prices/
         const prices = await axios.get<PriceCache>(
           'https://prices.csgotrader.app/latest/prices_v6.json'
         );
         this.priceCache = prices.data;
-        await cache.set(cacheKey, Buffer.from(JSON.stringify(this.priceCache)));
+        await cache.set(cacheKey, this.priceCache);
       }
     }
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -69,13 +68,8 @@ export class InventoryValueCache {
   public async getInventoryWithValue(steamId64: string): Promise<InventoryWithValue | undefined> {
     const cacheKey = `inventory-${steamId64}`;
     const data = await this.cache.get(cacheKey);
-    if (data) {
-      const dataString = data.toString();
-      if (dataString) {
-        return JSON.parse(data.toString());
-      }
-      return undefined; // Return cached empty value
-    }
+    if (data === '') return undefined;
+    if (data) return data;
     let inventory: InventoryWithValue | undefined;
     try {
       const items: EconItem[] = await this.inventory.get({
@@ -98,13 +92,13 @@ export class InventoryValueCache {
         collectibles,
       };
     } catch (err) {
-      if (err.response.status !== 403) {
+      if (err.response?.status !== 403) {
         throw err;
       }
       inventory = undefined;
     }
-    const cacheString = inventory ? JSON.stringify(inventory) : ''; // Cache undefined as empty string to prevent future API errors
-    await this.cache.set(cacheKey, Buffer.from(cacheString));
+    const cacheString = inventory || ''; // Cache undefined as empty string to prevent future API errors
+    await this.cache.set(cacheKey, cacheString);
     return inventory;
   }
 }

@@ -5,6 +5,7 @@ import TinyGradient from 'tinygradient';
 import fs from 'fs-extra';
 import path from 'path';
 import type { PackageJson } from 'types-package-json';
+import Keyv from 'keyv';
 import L from './logger';
 
 dotenv.config();
@@ -67,4 +68,21 @@ export const range = (start: number, stop: number, step?: number): number[] => {
     a.push((b += step || 1));
   }
   return a;
+};
+
+export interface GetCacheProps {
+  namespace?: string;
+  ttl?: number;
+}
+
+export const getCache = (props?: GetCacheProps): Keyv => {
+  const keyv = new Keyv(`sqlite://${getCacheDir()}/csgo-sus-cache.sqlite`, {
+    namespace: props?.namespace,
+    ttl: props?.ttl,
+    // Single quotes in the JSON object break the DB query. We have to base64 encode it to use Keyv properly.
+    serialize: (data) => Buffer.from(JSON.stringify(data), 'utf8').toString('base64'),
+    deserialize: (data) => JSON.parse(Buffer.from(data, 'base64').toString('utf8')),
+  });
+  keyv.on('error', (err) => L.error(err));
+  return keyv;
 };

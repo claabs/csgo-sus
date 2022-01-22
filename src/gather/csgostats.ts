@@ -5,12 +5,11 @@ import {
   PlayerFilterParams,
   PlayerOutput,
 } from 'csgostatsgg-scraper';
-import Cache from 'hybrid-disk-cache';
-import { getCacheDir } from '../common/util';
+import { getCache } from '../common/util';
 
 export class CSGOStatsGGScraperCache extends CSGOStatsGGScraper {
-  private cache = new Cache({
-    path: `${getCacheDir()}/csgo-sus-cache/csgostatsgg-scraper`,
+  private cache = getCache({
+    namespace: `csgostatsgg-scraper`,
     ttl: 60 * 60 * 24 * 7, // 1 week
   });
 
@@ -21,10 +20,10 @@ export class CSGOStatsGGScraperCache extends CSGOStatsGGScraper {
     const cacheKey = `played-with-${steamId64}`;
     const data = await this.cache.get(cacheKey);
     if (data) {
-      return JSON.parse(data.toString());
+      return data;
     }
     const resp = await super.getPlayedWith(steamId64, filterParams);
-    await this.cache.set(cacheKey, Buffer.from(JSON.stringify(resp)));
+    await this.cache.set(cacheKey, resp);
     return resp;
   }
 
@@ -35,10 +34,10 @@ export class CSGOStatsGGScraperCache extends CSGOStatsGGScraper {
     const cacheKey = `player-${anySteamId}`;
     const data = await this.cache.get(cacheKey);
     if (data) {
-      return JSON.parse(data.toString());
+      return data;
     }
     const resp = await super.getPlayer(anySteamId, filterParams);
-    await this.cache.set(cacheKey, Buffer.from(JSON.stringify(resp)));
+    await this.cache.set(cacheKey, resp);
     return resp;
   }
 }

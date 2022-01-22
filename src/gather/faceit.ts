@@ -1,6 +1,5 @@
-import Cache from 'hybrid-disk-cache';
 import axios from 'axios';
-import { getCacheDir } from '../common/util';
+import { getCache } from '../common/util';
 
 export interface Game {
   region: string;
@@ -74,21 +73,16 @@ export interface FaceitData {
 }
 
 export class FaceitCache {
-  private cache = new Cache({
-    path: `${getCacheDir()}/csgo-sus-cache/faceit`,
+  private cache = getCache({
+    namespace: `faceit`,
     ttl: 60 * 60 * 24 * 7, // 1 week
   });
 
   public async getFaceitData(steamId64: string): Promise<FaceitData | undefined> {
     const cacheKey = `faceit-${steamId64}`;
     const data = await this.cache.get(cacheKey);
-    if (data) {
-      const dataString = data.toString();
-      if (dataString) {
-        return JSON.parse(data.toString());
-      }
-      return undefined; // Return cached empty value
-    }
+    if (data === '') return undefined;
+    if (data) return data;
     let faceitData: FaceitData | undefined;
     try {
       const detailsResp = await axios.get<FaceitPlayerDetails>(
@@ -125,8 +119,8 @@ export class FaceitCache {
       }
       faceitData = undefined;
     }
-    const cacheString = faceitData ? JSON.stringify(faceitData) : ''; // Cache undefined as empty string to prevent future API errors
-    await this.cache.set(cacheKey, Buffer.from(cacheString));
+    const cacheString = faceitData || ''; // Cache undefined as empty string to prevent future API errors
+    await this.cache.set(cacheKey, cacheString);
     return faceitData;
   }
 }

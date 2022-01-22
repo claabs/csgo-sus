@@ -1,47 +1,35 @@
 import SteamAPI from 'steamapi';
-import Cache from 'hybrid-disk-cache';
-import { getCacheDir } from '../common/util';
+import { getCache } from '../common/util';
 
 export class SteamApiCache extends SteamAPI {
-  private cache = new Cache({
-    path: `${getCacheDir()}/csgo-sus-cache/steamapi`,
+  private cache = getCache({
+    namespace: `steamapi`,
     ttl: 60 * 60 * 24, // 1 day
   });
 
   public async resolve(value: string): Promise<string> {
     const cacheKey = `resolve-${value}`;
     const data = await this.cache.get(cacheKey);
-    if (data) {
-      return data.toString();
-    }
+    if (data) return data;
     const resp = await super.resolve(value);
-    await this.cache.set(cacheKey, Buffer.from(resp));
+    await this.cache.set(cacheKey, resp);
     return resp;
   }
 
   public async getUserLevel(id: string): Promise<number> {
     const cacheKey = `user-level-${id}`;
     const data = await this.cache.get(cacheKey);
-    if (data) {
-      return data.readUInt16BE();
-    }
+    if (data) return data;
     const resp = await super.getUserLevel(id);
-    const buf = Buffer.alloc(2);
-    buf.writeUInt16BE(resp);
-    await this.cache.set(cacheKey, buf);
+    await this.cache.set(cacheKey, resp);
     return resp;
   }
 
   public async getUserOwnedGamesOptional(id: string): Promise<SteamAPI.Game[] | undefined> {
     const cacheKey = `user-owned-games-${id}`;
     const data = await this.cache.get(cacheKey);
-    if (data) {
-      const dataString = data.toString();
-      if (dataString) {
-        return JSON.parse(data.toString());
-      }
-      return undefined; // Return cached empty value
-    }
+    if (data === '') return undefined;
+    if (data) return data;
     let games: SteamAPI.Game[] | undefined;
     try {
       games = await super.getUserOwnedGames(id);
@@ -51,41 +39,35 @@ export class SteamApiCache extends SteamAPI {
       }
       games = undefined;
     }
-    const cacheString = games ? JSON.stringify(games) : ''; // Cache undefined as empty string to prevent future API errors
-    await this.cache.set(cacheKey, Buffer.from(cacheString));
+    const cacheString = games || ''; // Cache undefined as empty string to prevent future API errors
+    await this.cache.set(cacheKey, cacheString);
     return games;
   }
 
   public async getUserBadges(id: string): Promise<SteamAPI.PlayerBadges> {
     const cacheKey = `user-badges-${id}`;
     const data = await this.cache.get(cacheKey);
-    if (data) {
-      return JSON.parse(data.toString());
-    }
+    if (data) return data;
     const resp = await super.getUserBadges(id);
-    await this.cache.set(cacheKey, Buffer.from(JSON.stringify(resp)));
+    await this.cache.set(cacheKey, resp);
     return resp;
   }
 
   public async getUserRecentGames(id: string): Promise<SteamAPI.Game[]> {
     const cacheKey = `user-recent-games-${id}`;
     const data = await this.cache.get(cacheKey);
-    if (data) {
-      return JSON.parse(data.toString());
-    }
+    if (data) return data;
     const resp = await super.getUserRecentGames(id);
-    await this.cache.set(cacheKey, Buffer.from(JSON.stringify(resp)));
+    await this.cache.set(cacheKey, resp);
     return resp;
   }
 
   public async getUserFriends(id: string): Promise<SteamAPI.Friend[]> {
     const cacheKey = `user-friends-${id}`;
     const data = await this.cache.get(cacheKey);
-    if (data) {
-      return JSON.parse(data.toString());
-    }
+    if (data) return data;
     const resp = await super.getUserFriends(id);
-    await this.cache.set(cacheKey, Buffer.from(JSON.stringify(resp)));
+    await this.cache.set(cacheKey, resp);
     return resp;
   }
 
@@ -98,9 +80,7 @@ export class SteamApiCache extends SteamAPI {
       ids.map(async (id) => {
         const cacheKey = `${cachePrefix}${id}`;
         const data = await this.cache.get(cacheKey);
-        if (data) {
-          return JSON.parse(data.toString());
-        }
+        if (data) return data;
         uncachedIds.push(id);
         return undefined;
       })
@@ -114,7 +94,7 @@ export class SteamApiCache extends SteamAPI {
     await Promise.all(
       resp.map(async (summary) => {
         const cacheKey = `${cachePrefix}${summary.steamID}`;
-        await this.cache.set(cacheKey, Buffer.from(JSON.stringify(summary)));
+        await this.cache.set(cacheKey, summary);
       })
     );
     // Recombine new and cached results
@@ -133,9 +113,7 @@ export class SteamApiCache extends SteamAPI {
       ids.map(async (id) => {
         const cacheKey = `${cachePrefix}${id}`;
         const data = await this.cache.get(cacheKey);
-        if (data) {
-          return JSON.parse(data.toString());
-        }
+        if (data) return data;
         uncachedIds.push(id);
         return undefined;
       })
@@ -149,7 +127,7 @@ export class SteamApiCache extends SteamAPI {
     await Promise.all(
       resp.map(async (bans) => {
         const cacheKey = `${cachePrefix}${bans.steamID}`;
-        await this.cache.set(cacheKey, Buffer.from(JSON.stringify(bans)));
+        await this.cache.set(cacheKey, bans);
       })
     );
     // Recombine new and cached results

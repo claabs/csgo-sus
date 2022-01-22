@@ -17,4 +17,12 @@
         "files.insertFinalNewline": true
     },
     "typescript.tsdk": "node_modules/typescript/lib",
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "driver": "SQLite",
+            "name": "Local SQLite",
+            "database": "./volume/csgo-sus-cache.sqlite"
+        }
+    ],
 }

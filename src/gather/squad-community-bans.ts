@@ -1,6 +1,5 @@
-import Cache from 'hybrid-disk-cache';
 import axios from 'axios';
-import { getCacheDir } from '../common/util';
+import { getCache } from '../common/util';
 
 export interface BanList {
   id: number;
@@ -54,17 +53,15 @@ export interface SquadBanResponse {
 }
 
 export class SquadCommunityBansCache {
-  private cache = new Cache({
-    path: `${getCacheDir()}/csgo-sus-cache/squad-community`,
+  private cache = getCache({
+    namespace: `squad-community`,
     ttl: 60 * 60 * 24 * 7, // 1 week
   });
 
   public async getReputation(steamId64: string): Promise<SquadBanResponse> {
     const cacheKey = `reputation-${steamId64}`;
     const data = await this.cache.get(cacheKey);
-    if (data) {
-      return JSON.parse(data.toString());
-    }
+    if (data) return data;
 
     const request = {
       operationName: 'Search',
@@ -140,7 +137,7 @@ export class SquadCommunityBansCache {
       `https://squad-community-ban-list.com/graphql`,
       request
     );
-    await this.cache.set(cacheKey, Buffer.from(JSON.stringify(resp.data)));
+    await this.cache.set(cacheKey, resp.data);
     return resp.data;
   }
 }
