@@ -18,7 +18,16 @@ RUN apt-get update \
 # Copy package.json for version number
 COPY package*.json ./
 
-RUN npm ci --only=production && $(npx install-browser-deps)
+RUN npm ci --only=production && $(npx install-browser-deps) \
+    # Heavy inspiration from: https://github.com/ulixee/secret-agent/blob/main/Dockerfile
+    && groupadd -r csgosus \
+    && useradd -r -g csgosus -G audio,video csgosus \
+    && mkdir -p /home/csgosus/Downloads \
+    && mkdir -p /home/csgosus/.cache \
+    && chown -R csgosus:csgosus /home/csgosus \
+    && mv ~/.cache/secret-agent /home/csgosus/.cache/ \
+    && chmod 777 /tmp \
+    && chmod -R 777 /home/csgosus/.cache/secret-agent
 
 ########
 # BUILD
@@ -42,23 +51,11 @@ RUN npm run build
 ########
 FROM deps as deploy
 
-# Steal compiled code from build image
-COPY --from=build /usr/app/dist ./dist 
-
-# Heavy inspiration from: https://github.com/ulixee/secret-agent/blob/main/Dockerfile
-RUN groupadd -r csgosus \
-    && useradd -r -g csgosus -G audio,video csgosus \
-    && mkdir -p /home/csgosus/Downloads \
-    && mkdir -p /home/csgosus/.cache \
-    && mkdir -p /csgo-sus \
-    && chown -R csgosus:csgosus /home/csgosus \
-    && chown -R csgosus:csgosus /usr/app \
-    && chown -R csgosus:csgosus /csgo-sus \
-    && mv ~/.cache/secret-agent /home/csgosus/.cache/ \
-    && chmod 777 /tmp \
-    && chmod -R 777 /home/csgosus/.cache/secret-agent
 # Add below to run as unprivileged user.
 USER csgosus
+
+# Steal compiled code from build image
+COPY --from=build /usr/app/dist ./dist 
 
 LABEL org.opencontainers.image.title="csgo-sus" \ 
     org.opencontainers.image.url="https://github.com/claabs/csgo-sus" \
