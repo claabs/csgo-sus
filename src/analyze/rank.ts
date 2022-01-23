@@ -71,7 +71,7 @@ export const analyzeRank = (player: PlayerData): RankAnalysis => {
   const bestRankEver: string | undefined = bestRankValue ? rankName[bestRankValue] : undefined;
   const currentRank: string | undefined = currentRankValue ? rankName[currentRankValue] : undefined;
   let bestRankPastYear: string | undefined;
-  const link = `https://csgostats.gg/player/${player.steamId.getSteamID64()}#/graphs`;
+  const link = `https://csgostats.gg/player/${player.steamId.getSteamID64()}?type=comp#/graphs`;
   if (rawData && bestRankValue && currentRankValue) {
     const reversedRawData = rawData.reverse();
     // const recentBestRankIndex = reversedRawData.findIndex((point) => point.rank === bestRank); // Can't use this since sometimes the best rank doesn't show on the graph...

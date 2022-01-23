@@ -1,5 +1,7 @@
 import SteamAPI from 'steamapi';
-import { getCache } from '../common/util';
+import { chunkArray, getCache } from '../common/util';
+
+export type FriendSummary = SteamAPI.Friend & SteamAPI.PlayerSummary & SteamAPI.PlayerBans;
 
 export class SteamApiCache extends SteamAPI {
   private cache = getCache({
@@ -71,9 +73,28 @@ export class SteamApiCache extends SteamAPI {
     return resp;
   }
 
-  public async getUserSummaryOrdered(
-    ids: string[]
-  ): Promise<(SteamAPI.PlayerSummary | undefined)[]> {
+  public async getUserFriendSummaries(id: string): Promise<FriendSummary[]> {
+    const friends = await this.getUserFriends(id);
+    const friendIds = friends.map((f) => f.steamID);
+    const summaries = await this.getUserSummaryOrdered(friendIds);
+    const bans = await this.getUserBansOrdered(friendIds);
+    const friendSummaries = friends.map(
+      (f, index): FriendSummary => ({
+        ...f,
+        ...summaries[index],
+        ...bans[index],
+      })
+    );
+    return friendSummaries;
+  }
+
+  public async getUserSummaryLimitless(ids: string[]): Promise<SteamAPI.PlayerSummary[]> {
+    const idChunks = chunkArray(ids, 100); // Steam API only accepts up to 100
+    const results = await Promise.all(idChunks.map((idChunk) => super.getUserSummary(idChunk)));
+    return results.flat();
+  }
+
+  public async getUserSummaryOrdered(ids: string[]): Promise<SteamAPI.PlayerSummary[]> {
     const cachePrefix = 'user-summary-';
     const uncachedIds: string[] = [];
     const cachedResults: (SteamAPI.PlayerSummary | undefined)[] = await Promise.all(
@@ -87,9 +108,9 @@ export class SteamApiCache extends SteamAPI {
     );
 
     if (!uncachedIds.length) {
-      return cachedResults;
+      return cachedResults as SteamAPI.PlayerSummary[];
     }
-    const resp = await super.getUserSummary(uncachedIds);
+    const resp = await this.getUserSummaryLimitless(uncachedIds);
     // Cache the new results
     await Promise.all(
       resp.map(async (summary) => {
@@ -103,10 +124,16 @@ export class SteamApiCache extends SteamAPI {
       if (cachedResult) return cachedResult;
       return resp.find((summary) => summary.steamID === id);
     });
-    return populatedResults;
+    return populatedResults as SteamAPI.PlayerSummary[];
   }
 
-  public async getUserBansOrdered(ids: string[]): Promise<(SteamAPI.PlayerBans | undefined)[]> {
+  public async getUserBansLimitless(ids: string[]): Promise<SteamAPI.PlayerBans[]> {
+    const idChunks = chunkArray(ids, 100); // Steam API only accepts up to 100
+    const results = await Promise.all(idChunks.map((idChunk) => super.getUserBans(idChunk)));
+    return results.flat();
+  }
+
+  public async getUserBansOrdered(ids: string[]): Promise<SteamAPI.PlayerBans[]> {
     const cachePrefix = 'user-bans-';
     const uncachedIds: string[] = [];
     const cachedResults: (SteamAPI.PlayerBans | undefined)[] = await Promise.all(
@@ -120,9 +147,9 @@ export class SteamApiCache extends SteamAPI {
     );
 
     if (!uncachedIds.length) {
-      return cachedResults;
+      return cachedResults as SteamAPI.PlayerBans[];
     }
-    const resp = await super.getUserBans(uncachedIds);
+    const resp = await this.getUserBansLimitless(uncachedIds);
     // Cache the new results
     await Promise.all(
       resp.map(async (bans) => {
@@ -136,6 +163,6 @@ export class SteamApiCache extends SteamAPI {
       if (cachedResult) return cachedResult;
       return resp.find((bans) => bans.steamID === id);
     });
-    return populatedResults;
+    return populatedResults as SteamAPI.PlayerBans[];
   }
 }

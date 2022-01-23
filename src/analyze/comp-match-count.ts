@@ -24,7 +24,7 @@ export const analyzeCompMatchWins = (player: PlayerData): CompMatchWinsAnalysis 
   const { csgoStatsPlayer } = player;
   const count = csgoStatsPlayer?.summary.competitiveWins;
   let score: number;
-  const link = `https://csgostats.gg/player/${player.steamId.getSteamID64()}`;
+  const link = `https://csgostats.gg/player/${player.steamId.getSteamID64()}?type=comp`;
   if (count) {
     score = scoreFunction(count);
   } else {

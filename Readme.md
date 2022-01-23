@@ -13,7 +13,7 @@ Lookup in-depth public data on CSGO players' accounts to see if they're suspicio
 - [x] Hours in CS
 - [x] Number of competitive matches won
 - [x] Player bans
-- [ ] Friend bans
+- [x] Friend bans
 - [ ] Steamrep
 - [ ] Smurf finder
 - [ ] Recent performance consistency
@@ -37,7 +37,7 @@ During algorithm development, a Discord bot is being used in lieu of a UI. Use `
 
 #### Example Low Trust Player
 
-![Example Discord output for a user with low trust](img/low-trust.png) 
+![Example Discord output for a user with low trust](img/low-trust.png)
 
 #### Example High Trust Player
 

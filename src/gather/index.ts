@@ -1,11 +1,11 @@
-import SteamApi, { Friend, PlayerBans, PlayerSummary, RecentGame } from 'steamapi';
+import SteamApi, { PlayerBans, PlayerSummary, RecentGame } from 'steamapi';
 import SteamID from 'steamid';
 import { CSGOStatsGGScraper, MatchType, Player, PlayerOutput } from 'csgostatsgg-scraper';
 import 'dotenv/config';
 import { EventEmitter } from 'events';
 import { AxiosError } from 'axios';
 import L from '../common/logger';
-import { SteamApiCache } from './steamapi';
+import { FriendSummary, SteamApiCache } from './steamapi';
 import { CSGOStatsGGScraperCache } from './csgostats';
 import { InventoryValueCache, InventoryWithValue } from './inventory';
 import { ReputationSummary, SteamRepCache } from './steamrep';
@@ -82,7 +82,7 @@ export interface PlayerData {
   ownedGames?: SteamApi.Game[];
   recentGames?: RecentGame[];
   badges?: SteamApi.PlayerBadges;
-  friends?: Friend[];
+  friends?: FriendSummary[];
   playerBans?: PlayerBans;
   csgoStatsPlayer?: PlayerOutput;
   csgoStatsDeepPlayedWith?: DeepPlayedWith;
@@ -143,8 +143,8 @@ export const getPlayersData = async (steamIds: SteamID[]): Promise<Promise<Playe
         ? await steam.getUserBadges(steamId.getSteamID64()).catch(logError)
         : undefined,
       friends: isPublic
-        ? await steam.getUserFriends(steamId.getSteamID64()).catch(logError)
-        : undefined, // TODO: Get friends' Steam details?
+        ? await steam.getUserFriendSummaries(steamId.getSteamID64()).catch(logError)
+        : undefined,
       inventory: await inventory.getInventoryWithValue(steamId.getSteamID64()).catch(logError),
       playerBans: playerBan,
       csgoStatsPlayer: await scraper.getPlayer(steamId.getSteamID64()).catch(logError),

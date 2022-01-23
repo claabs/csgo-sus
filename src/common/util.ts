@@ -91,3 +91,9 @@ export const getCache = (props?: GetCacheProps): Keyv => {
   keyv.on('error', (err) => L.error(err));
   return keyv;
 };
+
+export const chunkArray = <T>(initArray: T[], size: number): T[][] => {
+  return Array.from(new Array(Math.ceil(initArray.length / size)), (_, i) =>
+    initArray.slice(i * size, i * size + size)
+  );
+};
