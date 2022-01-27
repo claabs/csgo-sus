@@ -68,7 +68,15 @@ export class SteamApiCache extends SteamAPI {
     const cacheKey = `user-friends-${id}`;
     const data = await this.cache.get(cacheKey);
     if (data) return data;
-    const resp = await super.getUserFriends(id);
+    let resp: SteamAPI.Friend[];
+    try {
+      resp = await super.getUserFriends(id);
+    } catch (err) {
+      if (err.message !== 'Unauthorized') {
+        throw err;
+      }
+      resp = []; // Cache undefined as empty array to prevent future API errors
+    }
     await this.cache.set(cacheKey, resp);
     return resp;
   }
