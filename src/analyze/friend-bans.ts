@@ -11,8 +11,8 @@ export interface FriendBansAnalysis extends Analysis {
   bannedFriendsPlayedWith?: number;
 }
 
-const FRIENDS_BANNED_WHEN_FRIENDS_MULTIPLIER = -15;
-const FRIENDS_BANNED_BEFORE_FRIENDS_MULTIPLIER = -10;
+const FRIENDS_BANNED_WHEN_FRIENDS_MULTIPLIER = -10;
+const FRIENDS_BANNED_BEFORE_FRIENDS_MULTIPLIER = -5;
 const BANNED_FRIENDS_PLAYED_WITH_MULTIPLIER = -75;
 
 const friendsBannedWhenFriendsScoreFunction = (count: number): number => {
