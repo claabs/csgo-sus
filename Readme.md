@@ -14,6 +14,8 @@ Lookup in-depth public data on CSGO players' accounts to see if they're suspicio
 - [x] Number of competitive matches won
 - [x] Player bans
 - [x] Friend bans
+- [x] Friend bans
+- [x] Cheaters played with regularly
 - [ ] Steamrep
 - [ ] Smurf finder
 - [ ] Recent performance consistency
