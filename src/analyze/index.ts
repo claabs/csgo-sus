@@ -10,6 +10,7 @@ import { analyzeGameHours, GameHoursAnalysis } from './game-hours';
 import { analyzeCompMatchWins, CompMatchWinsAnalysis } from './comp-match-count';
 import { analyzePlayerBans, PlayerBansAnalysis } from './player-bans';
 import { analyzeFriendBans, FriendBansAnalysis } from './friend-bans';
+import { analyzePlayedWithBans, PlayedWithBansAnalysis } from './played-with-bans';
 
 /**
  * Account age
@@ -22,6 +23,7 @@ import { analyzeFriendBans, FriendBansAnalysis } from './friend-bans';
  * Number of competitive matches won
  * Player bans
  * Friend bans
+ * Cheaters played with regularly
  * Smurf finder
  * Recent performance consistency
  * Unusual statistics (HS%)
@@ -41,6 +43,7 @@ export interface AnalysisSummary {
   competitiveWins: CompMatchWinsAnalysis;
   playerBans: PlayerBansAnalysis;
   friendBans: FriendBansAnalysis;
+  playedWithBans: PlayedWithBansAnalysis;
 }
 
 export type AnalysesEntry = [keyof AnalysisSummary, AnalysisSummary[keyof AnalysisSummary]];
@@ -68,6 +71,7 @@ export const analyzePlayer = (player: PlayerData): PlayerAnalysis => {
     competitiveWins: analyzeCompMatchWins(player),
     playerBans: analyzePlayerBans(player),
     friendBans: analyzeFriendBans(player),
+    playedWithBans: analyzePlayedWithBans(player),
   };
   const totalScore = Object.values(analyses).reduce((acc, curr) => acc + curr.score, 0);
   const positiveAnalyses = Object.entries(analyses)

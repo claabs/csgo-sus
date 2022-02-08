@@ -8,12 +8,10 @@ import L from '../common/logger';
 export interface FriendBansAnalysis extends Analysis {
   friendsBannedWhenFriends?: number;
   friendsBannedBeforeFriends?: number;
-  bannedFriendsPlayedWith?: number;
 }
 
-const FRIENDS_BANNED_WHEN_FRIENDS_MULTIPLIER = -10;
-const FRIENDS_BANNED_BEFORE_FRIENDS_MULTIPLIER = -5;
-const BANNED_FRIENDS_PLAYED_WITH_MULTIPLIER = -75;
+const FRIENDS_BANNED_WHEN_FRIENDS_MULTIPLIER = -1;
+const FRIENDS_BANNED_BEFORE_FRIENDS_MULTIPLIER = -0.5;
 
 const friendsBannedWhenFriendsScoreFunction = (count: number): number => {
   return count * FRIENDS_BANNED_WHEN_FRIENDS_MULTIPLIER;
@@ -21,17 +19,13 @@ const friendsBannedWhenFriendsScoreFunction = (count: number): number => {
 const friendsBannedBeforeFriendsScoreFunction = (count: number): number => {
   return count * FRIENDS_BANNED_BEFORE_FRIENDS_MULTIPLIER;
 };
-const bannedFriendsPlayedWithScoreFunction = (count: number): number => {
-  return count * BANNED_FRIENDS_PLAYED_WITH_MULTIPLIER;
-};
 
 export const analyzeFriendBans = (player: PlayerData): FriendBansAnalysis => {
-  const { friends, csgoStatsDeepPlayedWith } = player;
+  const { friends } = player;
   let score = 0;
   const link = `https://csgostats.gg/player/${player.steamId.getSteamID64()}?type=comp#/players`;
   let friendsBannedWhenFriends;
   let friendsBannedBeforeFriends;
-  let bannedFriendsPlayedWith;
   if (friends) {
     const bannedFriends = friends
       .filter(
@@ -68,41 +62,26 @@ export const analyzeFriendBans = (player: PlayerData): FriendBansAnalysis => {
     const friendsBannedBeforeFriendsList = bannedFriends.filter((f) => !f.friendsWhenBanned);
     friendsBannedBeforeFriends = friendsBannedBeforeFriendsList.length || undefined;
     if (friendsBannedBeforeFriends) L.debug({ friendsBannedBeforeFriendsList });
+  }
 
-    const bannedFriendsPlayedWithList = bannedFriends.filter(
-      (f) => f.playedWithTimes && f.playedWithTimes > 0
-    );
-    bannedFriendsPlayedWith = bannedFriendsPlayedWithList.length || undefined;
-    if (bannedFriendsPlayedWith) L.debug({ bannedFriendsPlayedWithList });
-  }
-  const bannedPlayedWith = csgoStatsDeepPlayedWith?.root.filter(
-    (pw) => pw.details.is_banned || pw.details.vac_banned
-  );
-  if (bannedPlayedWith?.length) {
-    L.debug({ bannedPlayedWith });
-    bannedFriendsPlayedWith = (bannedFriendsPlayedWith || 0) + bannedPlayedWith.length || undefined;
-  }
   if (friendsBannedWhenFriends) {
     score += friendsBannedWhenFriendsScoreFunction(friendsBannedWhenFriends);
   }
   if (friendsBannedBeforeFriends) {
     score += friendsBannedBeforeFriendsScoreFunction(friendsBannedBeforeFriends);
   }
-  if (bannedFriendsPlayedWith) {
-    score += bannedFriendsPlayedWithScoreFunction(bannedFriendsPlayedWith);
-  }
+
   score = Math.min(0, score); // Don't get positive points
   return {
     friendsBannedWhenFriends,
     friendsBannedBeforeFriends,
-    bannedFriendsPlayedWith,
     score,
     link,
   };
 };
 
 const plotFriendsBannedWhenFriendsRateData = (): ScorePlotData => {
-  const x = range(-10, 0);
+  const x = range(0, 100);
   const y = x.map((xVal) => friendsBannedWhenFriendsScoreFunction(xVal));
   return {
     title: 'Number of friends banned during friendship',
@@ -112,7 +91,7 @@ const plotFriendsBannedWhenFriendsRateData = (): ScorePlotData => {
   };
 };
 const plotFriendsBannedBeforeFriendsRateData = (): ScorePlotData => {
-  const x = range(-10, 0);
+  const x = range(0, 100);
   const y = x.map((xVal) => friendsBannedBeforeFriendsScoreFunction(xVal));
   return {
     title: 'Number of friends banned before friendship',
@@ -121,18 +100,7 @@ const plotFriendsBannedBeforeFriendsRateData = (): ScorePlotData => {
     y,
   };
 };
-const plotBannedFriendsPlayedWithRateData = (): ScorePlotData => {
-  const x = range(-10, 0);
-  const y = x.map((xVal) => bannedFriendsPlayedWithScoreFunction(xVal));
-  return {
-    title: 'Number of people played with a significant amount that got banned',
-    x,
-    xAxisLabel: 'Number of players',
-    y,
-  };
-};
 export const friendBansPlot: ScorePlotData[] = [
   plotFriendsBannedWhenFriendsRateData(),
   plotFriendsBannedBeforeFriendsRateData(),
-  plotBannedFriendsPlayedWithRateData(),
 ];
