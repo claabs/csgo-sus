@@ -8,22 +8,23 @@ import {
 import { getCache } from '../common/util';
 
 export class CSGOStatsGGScraperCache extends CSGOStatsGGScraper {
-  private cache = getCache({
-    namespace: `csgostatsgg-scraper`,
-    ttl: 1000 * 60 * 60 * 24 * 7, // 1 week
-  });
+  private namespace = `csgostatsgg-scraper`;
+
+  private ttl = 1000 * 60 * 60 * 24 * 7; // 1 week
+
+  private cache = getCache();
 
   public async getPlayedWith(
     steamId64: string,
     filterParams?: PlayedWithFilterParams
   ): Promise<PlayedWith> {
-    const cacheKey = `played-with-${steamId64}`;
+    const cacheKey = `${this.namespace}:played-with-${steamId64}`;
     const data = await this.cache.get(cacheKey);
     if (data) {
       return data;
     }
     const resp = await super.getPlayedWith(steamId64, filterParams);
-    await this.cache.set(cacheKey, resp);
+    await this.cache.set(cacheKey, resp, this.ttl);
     return resp;
   }
 
@@ -31,13 +32,13 @@ export class CSGOStatsGGScraperCache extends CSGOStatsGGScraper {
     anySteamId: string | bigint,
     filterParams?: PlayerFilterParams
   ): Promise<PlayerOutput> {
-    const cacheKey = `player-${anySteamId}`;
+    const cacheKey = `${this.namespace}:player-${anySteamId}`;
     const data = await this.cache.get(cacheKey);
     if (data) {
       return data;
     }
     const resp = await super.getPlayer(anySteamId, filterParams);
-    await this.cache.set(cacheKey, resp);
+    await this.cache.set(cacheKey, resp, this.ttl);
     return resp;
   }
 }

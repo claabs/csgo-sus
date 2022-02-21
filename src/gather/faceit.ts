@@ -73,13 +73,14 @@ export interface FaceitData {
 }
 
 export class FaceitCache {
-  private cache = getCache({
-    namespace: `faceit`,
-    ttl: 1000 * 60 * 60 * 24 * 7, // 1 week
-  });
+  private namespace = `faceit`;
+
+  private ttl = 1000 * 60 * 60 * 24 * 7; // 1 week
+
+  private cache = getCache();
 
   public async getFaceitData(steamId64: string): Promise<FaceitData | undefined> {
-    const cacheKey = `faceit-${steamId64}`;
+    const cacheKey = `${this.namespace}:faceit-${steamId64}`;
     const data = await this.cache.get(cacheKey);
     if (data === '') return undefined;
     if (data) return data;
@@ -120,7 +121,7 @@ export class FaceitCache {
       faceitData = undefined;
     }
     const cacheString = faceitData || ''; // Cache undefined as empty string to prevent future API errors
-    await this.cache.set(cacheKey, cacheString);
+    await this.cache.set(cacheKey, cacheString, this.ttl);
     return faceitData;
   }
 }

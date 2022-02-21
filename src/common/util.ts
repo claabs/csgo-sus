@@ -68,24 +68,14 @@ export const range = (start: number, stop: number, step?: number): number[] => {
   return a;
 };
 
-export interface GetCacheProps {
-  /**
-   * A prefix to add to the key
-   */
-  namespace?: string;
-
-  /**
-   * Data expiration timeout in milliseconds
-   */
-  ttl?: number;
-}
-
-export const getCache = (props?: GetCacheProps): Keyv => {
-  const keyv = new Keyv(`sqlite://${getCacheDir()}/csgo-sus-cache.sqlite`, {
-    namespace: props?.namespace,
-    ttl: props?.ttl,
-  });
-  keyv.on('error', (err) => L.error(err));
+let keyv: Keyv | undefined;
+export const getCache = (): Keyv => {
+  if (!keyv) {
+    keyv = new Keyv(`sqlite://${getCacheDir()}/csgo-sus-cache.sqlite`, {
+      namespace: 'csgosus',
+    });
+    keyv.on('error', (err) => L.error(err));
+  }
   return keyv;
 };
 

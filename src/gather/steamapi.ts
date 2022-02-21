@@ -4,31 +4,32 @@ import { chunkArray, getCache } from '../common/util';
 export type FriendSummary = SteamAPI.Friend & SteamAPI.PlayerSummary & SteamAPI.PlayerBans;
 
 export class SteamApiCache extends SteamAPI {
-  private cache = getCache({
-    namespace: `steamapi`,
-    ttl: 1000 * 60 * 60 * 24, // 1 day
-  });
+  private namespace = `steamapi`;
+
+  private ttl = 1000 * 60 * 60 * 24; // 1 day
+
+  private cache = getCache();
 
   public async resolve(value: string): Promise<string> {
-    const cacheKey = `resolve-${value}`;
+    const cacheKey = `${this.namespace}:resolve-${value}`;
     const data = await this.cache.get(cacheKey);
     if (data) return data;
     const resp = await super.resolve(value);
-    await this.cache.set(cacheKey, resp);
+    await this.cache.set(cacheKey, resp, this.ttl);
     return resp;
   }
 
   public async getUserLevel(id: string): Promise<number> {
-    const cacheKey = `user-level-${id}`;
+    const cacheKey = `${this.namespace}:user-level-${id}`;
     const data = await this.cache.get(cacheKey);
     if (data) return data;
     const resp = await super.getUserLevel(id);
-    await this.cache.set(cacheKey, resp);
+    await this.cache.set(cacheKey, resp, this.ttl);
     return resp;
   }
 
   public async getUserOwnedGamesOptional(id: string): Promise<SteamAPI.Game[] | undefined> {
-    const cacheKey = `user-owned-games-${id}`;
+    const cacheKey = `${this.namespace}:user-owned-games-${id}`;
     const data = await this.cache.get(cacheKey);
     if (data === '') return undefined;
     if (data) return data;
@@ -42,30 +43,30 @@ export class SteamApiCache extends SteamAPI {
       games = undefined;
     }
     const cacheString = games || ''; // Cache undefined as empty string to prevent future API errors
-    await this.cache.set(cacheKey, cacheString);
+    await this.cache.set(cacheKey, cacheString, this.ttl);
     return games;
   }
 
   public async getUserBadges(id: string): Promise<SteamAPI.PlayerBadges> {
-    const cacheKey = `user-badges-${id}`;
+    const cacheKey = `${this.namespace}:user-badges-${id}`;
     const data = await this.cache.get(cacheKey);
     if (data) return data;
     const resp = await super.getUserBadges(id);
-    await this.cache.set(cacheKey, resp);
+    await this.cache.set(cacheKey, resp, this.ttl);
     return resp;
   }
 
   public async getUserRecentGames(id: string): Promise<SteamAPI.Game[]> {
-    const cacheKey = `user-recent-games-${id}`;
+    const cacheKey = `${this.namespace}:user-recent-games-${id}`;
     const data = await this.cache.get(cacheKey);
     if (data) return data;
     const resp = await super.getUserRecentGames(id);
-    await this.cache.set(cacheKey, resp);
+    await this.cache.set(cacheKey, resp, this.ttl);
     return resp;
   }
 
   public async getUserFriends(id: string): Promise<SteamAPI.Friend[]> {
-    const cacheKey = `user-friends-${id}`;
+    const cacheKey = `${this.namespace}:user-friends-${id}`;
     const data = await this.cache.get(cacheKey);
     if (data) return data;
     let resp: SteamAPI.Friend[];
@@ -77,7 +78,7 @@ export class SteamApiCache extends SteamAPI {
       }
       resp = []; // Cache undefined as empty array to prevent future API errors
     }
-    await this.cache.set(cacheKey, resp);
+    await this.cache.set(cacheKey, resp, this.ttl);
     return resp;
   }
 
@@ -103,7 +104,7 @@ export class SteamApiCache extends SteamAPI {
   }
 
   public async getUserSummaryOrdered(ids: string[]): Promise<SteamAPI.PlayerSummary[]> {
-    const cachePrefix = 'user-summary-';
+    const cachePrefix = `${this.namespace}:user-summary-`;
     const uncachedIds: string[] = [];
     const cachedResults: (SteamAPI.PlayerSummary | undefined)[] = await Promise.all(
       ids.map(async (id) => {
@@ -123,7 +124,7 @@ export class SteamApiCache extends SteamAPI {
     await Promise.all(
       resp.map(async (summary) => {
         const cacheKey = `${cachePrefix}${summary.steamID}`;
-        await this.cache.set(cacheKey, summary);
+        await this.cache.set(cacheKey, summary, this.ttl);
       })
     );
     // Recombine new and cached results
@@ -142,7 +143,7 @@ export class SteamApiCache extends SteamAPI {
   }
 
   public async getUserBansOrdered(ids: string[]): Promise<SteamAPI.PlayerBans[]> {
-    const cachePrefix = 'user-bans-';
+    const cachePrefix = `${this.namespace}:user-bans-`;
     const uncachedIds: string[] = [];
     const cachedResults: (SteamAPI.PlayerBans | undefined)[] = await Promise.all(
       ids.map(async (id) => {
@@ -162,7 +163,7 @@ export class SteamApiCache extends SteamAPI {
     await Promise.all(
       resp.map(async (bans) => {
         const cacheKey = `${cachePrefix}${bans.steamID}`;
-        await this.cache.set(cacheKey, bans);
+        await this.cache.set(cacheKey, bans, this.ttl);
       })
     );
     // Recombine new and cached results

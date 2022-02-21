@@ -25,10 +25,11 @@ export interface PriceCache {
 }
 
 export class InventoryValueCache {
-  private cache = getCache({
-    namespace: `inventory-value`,
-    ttl: 1000 * 60 * 60 * 24 * 7, // 1 week
-  });
+  private namespace = `inventory-value`;
+
+  private ttl = 1000 * 60 * 60 * 24 * 7; // 1 week
+
+  private cache = getCache();
 
   private inventory: Inventory;
 
@@ -43,13 +44,11 @@ export class InventoryValueCache {
   }
 
   private async getItemPrice(marketHashName: string): Promise<number | undefined> {
-    const cacheKey = `market-price`;
-    const cache = getCache({
-      namespace: `csgo-prices`,
-      ttl: 1000 * 60 * 60 * 24, // 1 day
-    });
+    const cacheKey = `csgo-prices:market-price`;
+    const ttl = 1000 * 60 * 60 * 24; // 1 day
+
     if (!this.priceCache) {
-      const data = await cache.get(cacheKey);
+      const data = await this.cache.get(cacheKey, {});
       if (data) {
         this.priceCache = data;
       } else {
@@ -58,7 +57,7 @@ export class InventoryValueCache {
           'https://prices.csgotrader.app/latest/prices_v6.json'
         );
         this.priceCache = prices.data;
-        await cache.set(cacheKey, this.priceCache);
+        await this.cache.set(cacheKey, this.priceCache, ttl);
       }
     }
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -66,7 +65,7 @@ export class InventoryValueCache {
   }
 
   public async getInventoryWithValue(steamId64: string): Promise<InventoryWithValue | undefined> {
-    const cacheKey = `inventory-${steamId64}`;
+    const cacheKey = `${this.namespace}:inventory-${steamId64}`;
     const data = await this.cache.get(cacheKey);
     if (data === '') return undefined;
     if (data) return data;
@@ -98,7 +97,7 @@ export class InventoryValueCache {
       inventory = undefined;
     }
     const cacheString = inventory || ''; // Cache undefined as empty string to prevent future API errors
-    await this.cache.set(cacheKey, cacheString);
+    await this.cache.set(cacheKey, cacheString, this.ttl);
     return inventory;
   }
 }

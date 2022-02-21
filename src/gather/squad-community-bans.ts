@@ -53,13 +53,14 @@ export interface SquadBanResponse {
 }
 
 export class SquadCommunityBansCache {
-  private cache = getCache({
-    namespace: `squad-community`,
-    ttl: 1000 * 60 * 60 * 24 * 7, // 1 week
-  });
+  private namespace = `squad-community`;
+
+  private ttl = 1000 * 60 * 60 * 24 * 7; // 1 week
+
+  private cache = getCache();
 
   public async getReputation(steamId64: string): Promise<SquadBanResponse> {
-    const cacheKey = `reputation-${steamId64}`;
+    const cacheKey = `${this.namespace}:reputation-${steamId64}`;
     const data = await this.cache.get(cacheKey);
     if (data) return data;
 
@@ -137,7 +138,7 @@ export class SquadCommunityBansCache {
       `https://squad-community-ban-list.com/graphql`,
       request
     );
-    await this.cache.set(cacheKey, resp.data);
+    await this.cache.set(cacheKey, resp.data, this.ttl);
     return resp.data;
   }
 }
