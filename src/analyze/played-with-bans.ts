@@ -20,7 +20,9 @@ export const analyzePlayedWithBans = (player: PlayerData): PlayedWithBansAnalysi
   const link = `https://csgostats.gg/player/${player.steamId.getSteamID64()}?type=comp#/players`;
 
   const bannedPlayedWith = csgoStatsDeepPlayedWith?.root.filter(
-    (pw) => (pw.details.is_banned || pw.details.vac_banned) && pw.stats.games > 5
+    // A player can be vac_banned but not is_banned, which I think just means they were banned in a non-CSGO game
+    // This excludes that case
+    (pw) => pw.details.is_banned && pw.stats.games > 5
   );
   if (bannedPlayedWith?.length) {
     L.debug({ bannedPlayedWith });
