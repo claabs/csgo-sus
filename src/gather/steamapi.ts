@@ -99,8 +99,14 @@ export class SteamApiCache extends SteamAPI {
 
   public async getUserSummaryLimitless(ids: string[]): Promise<SteamAPI.PlayerSummary[]> {
     const idChunks = chunkArray(ids, 100); // Steam API only accepts up to 100
-    const results = await Promise.all(idChunks.map((idChunk) => super.getUserSummary(idChunk)));
-    return results.flat();
+    const results = await Promise.all(
+      idChunks.map((idChunk) =>
+        super.getUserSummary(idChunk).catch((err) => {
+          if (err.message !== 'No players found') throw err;
+        })
+      )
+    );
+    return results.filter((e): e is SteamAPI.PlayerSummary[] => !!e).flat();
   }
 
   public async getUserSummaryOrdered(ids: string[]): Promise<SteamAPI.PlayerSummary[]> {
@@ -138,8 +144,14 @@ export class SteamApiCache extends SteamAPI {
 
   public async getUserBansLimitless(ids: string[]): Promise<SteamAPI.PlayerBans[]> {
     const idChunks = chunkArray(ids, 100); // Steam API only accepts up to 100
-    const results = await Promise.all(idChunks.map((idChunk) => super.getUserBans(idChunk)));
-    return results.flat();
+    const results = await Promise.all(
+      idChunks.map((idChunk) =>
+        super.getUserBans(idChunk).catch((err) => {
+          if (err.message !== 'No players found') throw err;
+        })
+      )
+    );
+    return results.filter((e): e is SteamAPI.PlayerBans[] => !!e).flat();
   }
 
   public async getUserBansOrdered(ids: string[]): Promise<SteamAPI.PlayerBans[]> {
