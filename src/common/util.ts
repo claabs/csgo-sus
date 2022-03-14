@@ -70,8 +70,14 @@ export const range = (start: number, stop: number, step?: number): number[] => {
 
 let keyv: Keyv | undefined;
 export const getCache = (): Keyv => {
+  const DB_FILE_PATH = `${getCacheDir()}/csgo-sus-cache.sqlite`;
   if (!keyv) {
-    keyv = new Keyv(`sqlite://${getCacheDir()}/csgo-sus-cache.sqlite`, {
+    const dbSize = fs.statSync(DB_FILE_PATH).size;
+    if (dbSize > 100000000) {
+      // TODO: Hack for corrupted DB prevention - delete when > 100MB
+      fs.unlinkSync(DB_FILE_PATH);
+    }
+    keyv = new Keyv(`sqlite://${DB_FILE_PATH}`, {
       namespace: 'csgosus',
     });
     keyv.on('error', (err) => L.error(err));
