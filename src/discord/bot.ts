@@ -125,8 +125,8 @@ export function analysisToEmbed(analysis: PlayerAnalysis): MessageEmbed {
 
 export async function investigateSteamIds(
   steamIds: SteamID[],
-  followUp: (opts: MessageOptions) => Promise<unknown>,
-  editReply: (opts: MessageOptions) => Promise<unknown>
+  followUp: (opts: Omit<MessageOptions, 'reply' | 'flags'>) => Promise<unknown>,
+  editReply: (opts: Omit<MessageOptions, 'reply' | 'flags'>) => Promise<unknown>
 ): Promise<void> {
   const embeds: MessageEmbed[] = [];
   L.debug({ steamIds: steamIds.map((id) => id.getSteamID64()) }, 'Detected some steam IDs');
