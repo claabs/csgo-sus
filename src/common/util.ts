@@ -72,10 +72,12 @@ let keyv: Keyv | undefined;
 export const getCache = (): Keyv => {
   const DB_FILE_PATH = `${getCacheDir()}/csgo-sus-cache.sqlite`;
   if (!keyv) {
-    const dbSize = fs.statSync(DB_FILE_PATH).size;
-    if (dbSize > 100000000) {
-      // TODO: Hack for corrupted DB prevention - delete when > 100MB
-      fs.unlinkSync(DB_FILE_PATH);
+    if (fs.existsSync(DB_FILE_PATH)) {
+      const dbSize = fs.statSync(DB_FILE_PATH).size;
+      if (dbSize > 100000000) {
+        // TODO: Hack for corrupted DB prevention - delete when > 100MB
+        fs.unlinkSync(DB_FILE_PATH);
+      }
     }
     keyv = new Keyv(`sqlite://${DB_FILE_PATH}`, {
       namespace: 'csgosus',
