@@ -154,7 +154,7 @@ export async function investigateSteamIds(
 try {
   client.on('messageCreate', async (message) => {
     const steamIds = parseStatus(message.content);
-    if (steamIds.length < 2) return;
+    if (steamIds.length < 1) return;
     // Send a message containing the status message (if the bot has message permissions)
     L.info(`Detected ${steamIds.length} steamIds in a message, investigating...`);
     const reply = await message.reply(`Investigating ${steamIds.length} users...`);

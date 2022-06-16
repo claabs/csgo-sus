@@ -28,7 +28,6 @@ import { analyzePlayedWithBans, PlayedWithBansAnalysis } from './played-with-ban
  * Recent performance consistency
  * Unusual statistics (HS%)
  * Steamrep
- * Squad community bans
  * Faceit
  */
 

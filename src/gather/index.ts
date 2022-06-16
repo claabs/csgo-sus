@@ -9,7 +9,6 @@ import { FriendSummary, SteamApiCache } from './steamapi';
 import { CSGOStatsGGScraperCache } from './csgostats';
 import { InventoryValueCache, InventoryWithValue } from './inventory';
 import { ReputationSummary, SteamRepCache } from './steamrep';
-import { SquadBanResponse, SquadCommunityBansCache } from './squad-community-bans';
 import { FaceitCache, FaceitData } from './faceit';
 import { cleanAxiosResponse } from '../common/util';
 
@@ -18,7 +17,6 @@ EventEmitter.defaultMaxListeners = 100; // This doesn't seem to work..
 const steam = new SteamApiCache(process.env.STEAM_API_KEY || '');
 const inventory = new InventoryValueCache();
 const steamrep = new SteamRepCache();
-const squadCommunityBans = new SquadCommunityBansCache();
 const faceIt = new FaceitCache();
 
 export const logErrorValue =
@@ -88,7 +86,6 @@ export interface PlayerData {
   csgoStatsDeepPlayedWith?: DeepPlayedWith;
   inventory?: InventoryWithValue;
   steamReputation?: ReputationSummary;
-  squadCommunityBans?: SquadBanResponse;
   faceit?: FaceitData;
 }
 
@@ -117,7 +114,10 @@ export const getPlayersData = async (steamIds: SteamID[]): Promise<Promise<Playe
     steam.getUserSummaryOrdered(steamIds64).catch(logErrorValue([], steamIds64)),
     steam.getUserBansOrdered(steamIds64).catch(logErrorValue([], steamIds64)),
   ]);
-  const scraper = new CSGOStatsGGScraperCache();
+  const scraper = new CSGOStatsGGScraperCache({
+    concurrency: 10,
+    useLocalHero: true,
+  });
 
   const playerDataPromises: Promise<PlayerData>[] = steamIds.map(async (steamId, index) => {
     const summary = playerSummaries[index];
@@ -152,14 +152,9 @@ export const getPlayersData = async (steamIds: SteamID[]): Promise<Promise<Playe
         logError
       ),
       steamReputation: await steamrep.getReputation(steamId.getSteamID64()).catch(logError),
-      squadCommunityBans: await squadCommunityBans
-        .getReputation(steamId.getSteamID64())
-        .catch(logError),
       faceit: await faceIt.getFaceitData(steamId.getSteamID64()).catch(logError),
     };
   });
-  // await (await scraper.handler.createAgent()).close(); // Temp fix for: https://github.com/ulixee/secret-agent/issues/394
-  // await scraper.close();
   return playerDataPromises;
 };
 

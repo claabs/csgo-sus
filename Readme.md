@@ -20,7 +20,6 @@ Lookup in-depth public data on CSGO players' accounts to see if they're suspicio
 - [ ] Smurf finder
 - [ ] Recent performance consistency
 - [ ] Unusual statistics (HS%)
-- [ ] Squad community bans
 - [ ] Faceit
 
 ## Usage
