@@ -22,7 +22,7 @@ export interface ReputationResponse {
   steamrep: Steamrep;
 }
 
-export type ReputationSummary = 'none' | string;
+export type ReputationSummary = 'none' | 'SCAMMER' | string;
 
 // Example scammer: https://steamrep.com/api/beta4/reputation/76561198260351049?json=1
 // Example normal: https://steamrep.com/api/beta4/reputation/76561197964105706?json=1

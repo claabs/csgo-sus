@@ -16,11 +16,15 @@ Lookup in-depth public data on CSGO players' accounts to see if they're suspicio
 - [x] Friend bans
 - [x] Friend bans
 - [x] Cheaters played with regularly
-- [ ] Steamrep
+- [x] Steamrep
 - [ ] Smurf finder
 - [ ] Recent performance consistency
 - [ ] Unusual statistics (HS%)
 - [ ] Faceit
+- [ ] Esportal
+- [ ] SourceBans
+- [ ] RustBanned
+- [ ] ServerArmour
 
 ## Usage
 

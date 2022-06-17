@@ -11,6 +11,7 @@ import { analyzeCompMatchWins, CompMatchWinsAnalysis } from './comp-match-count'
 import { analyzePlayerBans, PlayerBansAnalysis } from './player-bans';
 import { analyzeFriendBans, FriendBansAnalysis } from './friend-bans';
 import { analyzePlayedWithBans, PlayedWithBansAnalysis } from './played-with-bans';
+import { analyzeSteamRep, SteamRepAnalysis } from './steamrep';
 
 /**
  * Account age
@@ -43,6 +44,7 @@ export interface AnalysisSummary {
   playerBans: PlayerBansAnalysis;
   friendBans: FriendBansAnalysis;
   playedWithBans: PlayedWithBansAnalysis;
+  steamRep: SteamRepAnalysis;
 }
 
 export type AnalysesEntry = [keyof AnalysisSummary, AnalysisSummary[keyof AnalysisSummary]];
@@ -71,6 +73,7 @@ export const analyzePlayer = (player: PlayerData): PlayerAnalysis => {
     playerBans: analyzePlayerBans(player),
     friendBans: analyzeFriendBans(player),
     playedWithBans: analyzePlayedWithBans(player),
+    steamRep: analyzeSteamRep(player),
   };
   const totalScore = Object.values(analyses).reduce((acc, curr) => acc + curr.score, 0);
   const positiveAnalyses = Object.entries(analyses)
